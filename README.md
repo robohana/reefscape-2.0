@@ -36,15 +36,15 @@ Class Naming (**PascalCase**:) \
 ## Motor Information
 > This all needs to be filled in **AFTER** we update all the motor controllers
 
-| Motor Name      | Can ID    |
-| :---            |   :---:   |
-| roboRIO         | 0         |
-| PDH             | _         |
-| frontLeftDrive  | _         |
-| frontLeftSteer  | _         |
-| frontRightDrive | _         |
-| frontRightSteer | _         |
-| backLeftDrive   | _         |
-| backLeftSteer   | _         |
-| backRightDrive  | _         |
-| backRightSteer  | _         |
+| Motor Name        | Can ID    |
+| :---              |   :---:   |
+| roboRIO           | 0         |
+| PDH               | _         |
+| FRONT_LEFT_DRIVE  | _         |
+| FRONT_LEFT_STEER  | _         |
+| FRONT_RIGHT_DRIVE | _         |
+| FRONT_RIGHT_STEER | _         |
+| BACK_LEFT_DRIVE   | _         |
+| BACK_LEFT_STREER  | _         |
+| BACK_RIGHT_DRIVE  | _         |
+| BACK_RIGHT_STEER  | _         |

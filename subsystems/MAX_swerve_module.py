@@ -71,7 +71,7 @@ class MAXSwerveModule(commands2.SubsystemBase):
     def set_desired_state(self, desired_state: SwerveModuleState):
         corrected_desired_state = SwerveModuleState()
         corrected_desired_state.speed = desired_state.speed
-        corrected_desired_state.angle = desired_state.angle + Rotation2d.radians(self.chassis_angular_offset) # double check Rotation2d.radians, in java its Rotation2d.fromRadians. My serveal minutes of looking makes me belive that they serve the same function - LC 2/23/25
+        corrected_desired_state.angle = desired_state.angle + Rotation2d(self.chassis_angular_offset) # double check Rotation2d.radians, in java its Rotation2d.fromRadians. My serveal minutes of looking makes me belive that they serve the same function - LC 2/23/25
 
         corrected_desired_state.optimize(Rotation2d(self.turn_encoder.getPosition()))
 
@@ -79,4 +79,5 @@ class MAXSwerveModule(commands2.SubsystemBase):
 
     def reset_encoders(self):
         self.drive_encoder.setPosition(0)
+
 

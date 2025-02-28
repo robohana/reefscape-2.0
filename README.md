@@ -34,7 +34,8 @@ Class Naming (**PascalCase**:) \
 
 
 ## Motor Information
-> This all needs to be filled in **AFTER** we update all the motor controllers
+> Turn Sparks have even IDs \
+> Drive Sparks have odd IDs
 
 | Motor Name        | Can ID    |
 | :---              |   :---:   |

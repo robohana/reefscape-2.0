@@ -1,7 +1,7 @@
 import math
 
 import commands2
-from commands2 import Command, CommandScheduler, cmd, InstantCommand, RunCommand
+from commands2 import Command, CommandScheduler, cmd, InstantCommand
 import wpimath
 import wpilib
 
@@ -21,6 +21,7 @@ from wpimath.controller import (
 
 from subsystems.drivetrain import DriveSubsystem
 from constants.oi_constants import OIConstants
+from commands.SwerveJoystickCmd import SwerveJoystickCmd
 
 
 import commands.auto_routines
@@ -41,25 +42,41 @@ class RobotContainer:
 
         self.driver_controller = wpilib.XboxController(OIConstants.K_DRIVER_CONTROLLER_PORT)
 
+
+        # self.robot_drive.setDefaultCommand(
+        #     RunCommand(
+        #         lambda: self.robot_drive.drive(
+        #             -wpimath.applyDeadband(self.driver_controller.getLeftY(), OIConstants.DEADZONE),
+        #             -wpimath.applyDeadband(self.driver_controller.getLeftX(), OIConstants.DEADZONE),
+        #             -wpimath.applyDeadband(self.driver_controller.getRightX(), OIConstants.DEADZONE),
+        #             True,
+        #         ),
+        #         self.robot_drive
+        #     )
+        # )
+        self.robot_drive.setDefaultCommand(SwerveJoystickCmd(self.robot_drive, self.driver_controller))
+        
+        
+        
         self.configure_button_bindings()
 
-        self.robot_drive.setDefaultCommand(
-            RunCommand(
-                lambda: self.robot_drive.drive(
-                    -wpimath.applyDeadband(self.driver_controller.getLeftY(), OIConstants.DEADZONE),
-                    -wpimath.applyDeadband(self.driver_controller.getLeftX(), OIConstants.DEADZONE),
-                    -wpimath.applyDeadband(self.driver_controller.getRightX(), OIConstants.DEADZONE),
-                    True
-                ),
-                self.robot_drive
-            )
-        )
+            
+
+    # def debug_drive(self):
+    #     y = -wpimath.applyDeadband(self.driver_controller.getLeftY(), OIConstants.DEADZONE)
+    #     x = -wpimath.applyDeadband(self.driver_controller.getLeftX(), OIConstants.DEADZONE)
+    #     rotation = -wpimath.applyDeadband(self.driver_controller.getRightX(), OIConstants.DEADZONE)
+
+    #     #print(f"Driving: Y={y}, X={x}, Rotation={rotation}")
+    #     self.robot_drive.drive(y, x, rotation, True)
+    #     #print ("in containers")
         
     def configure_button_bindings(self) -> None:
-        if abs(self.driver_controller.getLeftY()) > 0.1:  # Threshold for when the stick is held
-            self.robot_drive.set_x_command()  # Trigger the command based on stick position
+        pass
+        # if abs(self.driver_controller.getLeftY()) > 0.1:  # Threshold for when the stick is held
+        #     self.robot_drive.set_x_command()  # Trigger the command based on stick position
 
     def get_autonomous_command(self) -> commands2.Command:
-        self.autonomous_command = commands.auto_routines
+        return commands.auto_routines
        
 

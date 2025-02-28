@@ -39,12 +39,12 @@ Class Naming (**PascalCase**:) \
 | Motor Name        | Can ID    |
 | :---              |   :---:   |
 | roboRIO           | 0         |
-| PDH               | _         |
-| FRONT_LEFT_DRIVE  | _         |
-| FRONT_LEFT_STEER  | _         |
-| FRONT_RIGHT_DRIVE | _         |
-| FRONT_RIGHT_STEER | _         |
-| BACK_LEFT_DRIVE   | _         |
-| BACK_LEFT_STREER  | _         |
-| BACK_RIGHT_DRIVE  | _         |
-| BACK_RIGHT_STEER  | _         |
+| PDH               | 1         |
+| FRONT_LEFT_DRIVE  | 23        |
+| FRONT_LEFT_STEER  | 22        |
+| FRONT_RIGHT_DRIVE | 21        |
+| FRONT_RIGHT_STEER | 20        |
+| BACK_LEFT_DRIVE   | 25        |
+| BACK_LEFT_STREER  | 24        |
+| BACK_RIGHT_DRIVE  | 27        |
+| BACK_RIGHT_STEER  | 26        |

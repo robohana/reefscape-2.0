@@ -29,12 +29,13 @@ from ntcore import NetworkTableInstance, StructPublisher, StructArrayPublisher
 import time
 import commands2
 
+from wpilib import SmartDashboard as sd
+
 class DriveSubsystem(Subsystem):
     """Represents the drive subsystem of the robot. """
 
     def __init__(self) -> None:
         super().__init__()
-        self.sd = wpilib.SmartDashboard
 
         self.front_left = MAXSwerveModule(
             ModuleConstants.K_FRONT_LEFT_DRIVE_ID, 
@@ -62,6 +63,7 @@ class DriveSubsystem(Subsystem):
         
         self.gyro = AHRS(comType=navx._navx.AHRS.NavXComType.kMXP_SPI)
 
+        
         self.odometry = SwerveDrive4Odometry(
             DriveConstants.KINEMATICS,
             Rotation2d(),
@@ -126,6 +128,7 @@ class DriveSubsystem(Subsystem):
                 rot_delivered,
                 Rotation2d.fromDegrees(self.gyro.getAngle())
             )
+            print 
         else:
             chassis_speeds = ChassisSpeeds(
                 x_speed_delivered,
@@ -135,14 +138,19 @@ class DriveSubsystem(Subsystem):
 
         swerve_module_states = DriveConstants.KINEMATICS.toSwerveModuleStates(chassis_speeds)
         
-        fl, fr, bl, br = SwerveDrive4Kinematics.desaturateWheelSpeeds(
+        SwerveDrive4Kinematics.desaturateWheelSpeeds(
             swerve_module_states, DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND
-        )
+            )
+
+        fl, fr, bl, br = swerve_module_states
+        print(f"FL: {fl}, FR: {fr}, BL: {bl}, BR: {br}")
+
 
         self.front_left.set_desired_state(fl)
         self.front_right.set_desired_state(fr)
         self.back_left.set_desired_state(bl)
         self.back_right.set_desired_state(br)
+        #print (f"sms{swerve_module_states}")
 
     def set_x_command(self) -> None:
         """Sets the wheels into an X formation to prevent movement."""
@@ -158,9 +166,12 @@ class DriveSubsystem(Subsystem):
 
         :param desired_states: The desired SwerveModule states.
         """
-        fl, fr, bl, br = SwerveDrive4Kinematics.desaturateWheelSpeeds(
-            desired_states, DriveConstants.K_PHYSICAL_MAX_ANGULAR_VELOCITY_METERS_PER_SECOND
-        )
+        SwerveDrive4Kinematics.desaturateWheelSpeeds(
+            desired_states, DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND
+            )
+
+        fl, fr, bl, br = desired_states
+        
         self.front_left.set_desired_state(fl)
         self.front_right.set_desired_state(fr)
         self.back_left.set_desired_state(bl)

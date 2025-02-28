@@ -19,8 +19,9 @@ class MyRobot(TimedCommandRobot):
     def robotInit(self) -> None:
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.
+        print("Robot is initializing...")  # Debug output
         self.container = RobotContainer()
-
+        print("RobotContainer initialized!")  
         self.autonomous_command = self.container.get_autonomous_command()
 
     def robotPeriodic(self) -> None:
@@ -43,11 +44,9 @@ class MyRobot(TimedCommandRobot):
         pass
 
     def teleopInit(self) -> None:
-        pass
-        #print("Starting TeleOp... ")
-        #SwerveModule.resetEncoders()
-        if self.autonomous_command is not None:
-            self.autonomous_command.cancel()   
+        print("Teleop is running!")  # Debug output
+        #CommandScheduler.getInstance().run()
+
 
     def teleopPeriodic(self) -> None:
         pass

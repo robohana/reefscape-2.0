@@ -262,7 +262,7 @@ class DriveSubsystem(Subsystem):
             # )
         
             SwerveDrive4Kinematics.desaturateWheelSpeeds(
-                swerveModuleStates, DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND
+                swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond
             )
 
             fl, fr, bl, br = swerveModuleStates
@@ -292,7 +292,7 @@ class DriveSubsystem(Subsystem):
         """
         
         SwerveDrive4Kinematics.desaturateWheelSpeeds(
-            desiredStates, DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND
+            desiredStates, DriveConstants.kMaxSpeedMetersPerSecond
             )
 
         fl, fr, bl, br = desiredStates

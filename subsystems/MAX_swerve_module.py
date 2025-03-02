@@ -1,83 +1,98 @@
 import math
-import wpilib
-import time
-import threading
-import wpimath.kinematics
-import wpimath.geometry
-import wpimath.controller
-import wpimath.trajectory
-from wpimath.geometry import Rotation2d
-from wpimath import units
-from wpimath.trajectory import TrajectoryConfig
-from wpilib import AnalogEncoder
 import commands2
 
-from wpimath.controller import PIDController, ProfiledPIDController, SimpleMotorFeedforwardMeters, SimpleMotorFeedforwardRadians
-from constants.module_constants import ModuleConstants
+from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters, SimpleMotorFeedforwardRadians
+from constants import DriveConstants
 
 from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig
-from math import radians, pi
-
-
 
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 from ntcore import NetworkTableInstance
-from commands2 import CommandScheduler
-import configs
-
 
 
 class MAXSwerveModule(commands2.SubsystemBase):
-    def __init__(self, drive_can_id: int, turn_can_id: int, chassis_angular_offset: float) -> None:
+    def __init__(self, driveMotorChannel: int, turningMotorChannel: int,  chassis_angular_offset: float) -> None:
+        """Constructs a SwerveModule with a drive motor, turning motor, drive encoder, and turning encoder."""
         super().__init__()
-	 
-        self.drive_motor = SparkMax(drive_can_id, SparkMax.MotorType.kBrushless)
-        self.turn_motor = SparkMax(turn_can_id, SparkMax.MotorType.kBrushless)
-		
-		# Setup encoders for the drive and turning motors.
-        self.drive_encoder = self.drive_motor.getEncoder()
-        self.turn_encoder = self.turn_motor.getAbsoluteEncoder()
-		
-        self.drive_motor.configure(
-			configs.MAXSwerveModule.drive_config,
-            SparkBase.ResetMode.kResetSafeParameters,
-            SparkBase.PersistMode.kPersistParameters
-		)
-        self.turn_motor.configure(
-			configs.MAXSwerveModule.turn_config,
-            SparkBase.ResetMode.kResetSafeParameters,
-            SparkBase.PersistMode.kPersistParameters
-		)
+        # Force NetworkTables to start
+        self.nt = NetworkTableInstance.getDefault()
+        self.debugTable = self.nt.getTable("SwerveDebug")
+        print("NetworkTables started: SwerveDebug should be available")
 
-        self.desired_state = SwerveModuleState()  # Make sure to initialize it
 
+        self.driveMotor = SparkMax(driveMotorChannel, SparkMax.MotorType.kBrushless)
+        self.turningMotor = SparkMax(turningMotorChannel, SparkMax.MotorType.kBrushless)
+
+        driveMotorConfig = SparkMaxConfig()
+        turnMotorConfig = SparkMaxConfig()
+
+        driveMotorConfig.encoder.positionConversionFactor(DriveConstants.K_DRIVE_ENCODER_ROT2METER)
+        driveMotorConfig.encoder.velocityConversionFactor(DriveConstants.K_DRIVE_ENCODER_RPM2METER_PER_SEC) 
+
+        turnMotorConfig.encoder.positionConversionFactor(DriveConstants.K_TURN_ENCODER_ROT2RAD)
+        turnMotorConfig.encoder.velocityConversionFactor(DriveConstants.K_TURN_ENCODER_RPM2RAD_PER_SEC)
+
+        self.driveMotor.configure(driveMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
+        self.turningMotor.configure(turnMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
+
+        # Setup encoders for the drive and turning motors.
+        self.driveEncoder = self.driveMotor.getEncoder()
+        self.turningEncoder = self.turningMotor.getAbsoluteEncoder()
+
+
+        # Setup PID controllers for the driving and turning SPARKS MAX.
+        self.drivePIDController = self.driveMotor.getClosedLoopController()
+        self.turningPIDController = PIDController(DriveConstants.K_TURN_P, DriveConstants.K_TURN_I, DriveConstants.K_TURN_D)
+        self.turningPIDController.enableContinuousInput(-math.pi, math.pi)
+
+        self.driveFeedforward = SimpleMotorFeedforwardMeters(DriveConstants.K_DRIVE_KS, DriveConstants.K_DRIVE_KV)
+        self.turnFeedforward = SimpleMotorFeedforwardRadians(DriveConstants.K_TURN_KS, DriveConstants.K_TURN_KV)
+
+        # Set the idle mode for the motors to brake.
+        driveMotorConfig.setIdleMode(SparkBaseConfig.IdleMode.kBrake)
+        turnMotorConfig.setIdleMode(SparkBaseConfig.IdleMode.kBrake)
+
+        self.desiredState = SwerveModuleState()
         self.chassis_angular_offset = chassis_angular_offset
-        self.desired_state.angle = Rotation2d(self.turn_encoder.getPosition())
-        self.drive_encoder.setPosition(0)
+        self.desiredState.angle = Rotation2d(self.turningEncoder.getPosition())
+        self.resetEncoders()
 
-    def get_state(self):
-        return SwerveModuleState(
-            self.drive_encoder.getVelocity(),
-            Rotation2d(self.turn_encoder.getPosition() - self.chassis_angular_offset)
-        )
+    def resetEncoders(self):
+        """Resets the drive encoder to zero."""
+        self.driveEncoder.setPosition(0)
+
+    def getState(self) -> SwerveModuleState:
+        """Returns the current state of the module."""
+        return SwerveModuleState(self.driveEncoder.getVelocity(), Rotation2d(self.turningEncoder.getPosition() - self.chassis_angular_offset))
     
     def get_position(self):
         return SwerveModulePosition(
-            self.drive_encoder.getPosition(),
-            Rotation2d(self.turn_encoder.getPosition() - self.chassis_angular_offset)
+            self.driveEncoder.getPosition(),
+            Rotation2d(self.turningEncoder.getPosition() - self.chassis_angular_offset)
         )
-    
-    def set_desired_state(self, desired_state: SwerveModuleState):
-        corrected_desired_state = SwerveModuleState()
-        corrected_desired_state.speed = desired_state.speed
-        corrected_desired_state.angle = desired_state.angle + Rotation2d(self.chassis_angular_offset) # double check Rotation2d.radians, in java its Rotation2d.fromRadians. My serveal minutes of looking makes me belive that they serve the same function - LC 2/23/25
+ 
 
-        corrected_desired_state.optimize(Rotation2d(self.turn_encoder.getPosition()))
+    def setDesiredState(self, state: SwerveModuleState):
+        """Sets the desired state of the module, using PID and feedforward for the drive motor."""
+        self.desiredState = state
+        state.optimize(self.getState().angle)
+        if math.isclose(state.speed, 0):
+            self.driveMotor.stopMotor()
+        else:
+            self.drivePIDController.setReference(state.speed, SparkBase.ControlType.kVelocity)
 
-        self.desired_state = desired_state
+        try:
+            # For the turning motor, we typically use PID control.
+            turningOutput = self.turningPIDController.calculate(self.getState().angle, state.angle.radians())
+            self.turningMotor.set(turningOutput)
+        except Exception as e:
+            print(f"Turning motor set error: {e}")
+            self.turningMotor.set(0)
 
-    def reset_encoders(self):
-        self.drive_encoder.setPosition(0)
 
-
+    def stop(self):
+        """Stops the module."""
+        self.driveMotor.stopMotor()
+        self.turningMotor.stopMotor()
+        

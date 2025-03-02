@@ -55,8 +55,8 @@ class MAXSwerveModule(commands2.SubsystemBase):
         turnMotorConfig.closedLoop.positionWrappingEnabled(True) # I don't know if this is a correct value - LC 2/23/25
         turnMotorConfig.closedLoop.positionWrappingInputRange(0, DriveConstants.K_TURN_ENCODER_ROT2RAD)
 
-        self.driveMotor.configure(driveMotorConfig)
-        self.turningMotor.configure(turnMotorConfig) 
+        self.driveMotor.configure(driveMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
+        self.turningMotor.configure(turnMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters) 
 
 
         self.desiredState = SwerveModuleState()

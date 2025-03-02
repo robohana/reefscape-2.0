@@ -23,10 +23,10 @@ from wpimath.kinematics import (
     SwerveModulePosition
 )
 
-from constants import ModuleConstants, RobotConstants, DrivingConstants
+from constants import RobotConstants, DriveConstants
 from wpilib import SmartDashboard as sd
 import swerveutils
-from MAXSwerveModule import MAXSwerveModule
+from subsystems.MAXSwerveModule import MAXSwerveModule
 from navx import AHRS
 import navx
 from ntcore import NetworkTableInstance, StructPublisher, StructArrayPublisher
@@ -97,7 +97,16 @@ class DriveSubsystem(Subsystem):
         # self.prevTime = wpilib.Timer.getFPGATimestamp()
 
         # Odometry class for tracking robot pose
-        self.odometry = SwerveDrive4Odometry(DrivingConstants.KINEMATICS, Rotation2d(0), self.getModulePositionsOld())
+        self.odometry = SwerveDrive4Odometry(
+            RobotConstants.KINEMATICS,
+            Rotation2d(),
+            [
+                self.front_left.get_position(),
+                self.front_right.get_position(),
+                self.back_left.get_position(),
+                self.back_right.get_position()
+            ]
+        )
 
         thread = threading.Thread(target = self.zero_heading_after_delay)
 
@@ -108,14 +117,14 @@ class DriveSubsystem(Subsystem):
         self.odometry.update(
             self.getRotation2d(), 
                 (       
-                    self.front_left.getDrivePosition(),
-                    self.front_right.getDrivePosition(),
-                    self.back_left.getDrivePosition(),
-                    self.back_right.getDrivePosition()   
+                    self.front_left.get_position(),
+                    self.front_right.get_position(),
+                    self.back_left.get_position(),
+                    self.back_right.get_position()   
                 )
             )
         
-        sd.putString("Robot Odometer", str(self.getModulePositionsOld()))
+        # sd.putString("Robot Odometer", str(self.getModulePositionsOld()))
         sd.putString("Robot Location, x", str(self.get_pose().X()))
         sd.putString("Robot Location, y", str(self.get_pose().Y()))
         sd.putString("Robot Location, rotation", str(self.get_pose().rotation().degrees()))    
@@ -238,7 +247,7 @@ class DriveSubsystem(Subsystem):
             y_speed_delivered = ySpeed * DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND
             rot_delivered = rot * DriveConstants.K_TELE_DRIVE_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND
 
-            swerveModuleStates = DrivingConstants.kinematics.toSwerveModuleStates(
+            swerveModuleStates = RobotConstants.KINEMATICS.toSwerveModuleStates(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                     x_speed_delivered,
                     y_speed_delivered,
@@ -294,20 +303,20 @@ class DriveSubsystem(Subsystem):
         self.back_right.setDesiredState(br)
 
 
-    def getModulePositionsOld(self) -> tuple[SwerveModulePosition, SwerveModulePosition,SwerveModulePosition,SwerveModulePosition]:
-        return (
-                SwerveModulePosition(self.front_left.get_position(), Rotation2d(self.front_left.getAbsoluteEncoderRad())),
-                SwerveModulePosition(self.front_right.get_position(), Rotation2d(self.front_right.getAbsoluteEncoderRad())),
-                SwerveModulePosition(self.back_left.get_position(), Rotation2d(self.back_left.getAbsoluteEncoderRad())),
-                SwerveModulePosition(self.back_right.get_position(), Rotation2d(self.back_right.getAbsoluteEncoderRad()))
-                )
-    def getModuleStates(self) -> tuple[SwerveModuleState, SwerveModuleState, SwerveModuleState, SwerveModuleState]:
-        return (
-            SwerveModuleState(self.front_left.get_position(), Rotation2d(self.front_left.getAbsoluteEncoderRad())),
-                SwerveModuleState(self.front_right.get_position(), Rotation2d(self.front_right.getAbsoluteEncoderRad())),
-                SwerveModuleState(self.back_left.get_position(), Rotation2d(self.back_left.getAbsoluteEncoderRad())),
-                SwerveModuleState(self.back_right.get_position(), Rotation2d(self.back_right.getAbsoluteEncoderRad()))
-        )
+    # def getModulePositionsOld(self) -> tuple[SwerveModulePosition, SwerveModulePosition,SwerveModulePosition,SwerveModulePosition]:
+    #     return (
+    #             SwerveModulePosition(self.front_left.get_position(), Rotation2d(self.front_left.get_position())),
+    #             SwerveModulePosition(self.front_right.get_position(), Rotation2d(self.front_right.get_position())),
+    #             SwerveModulePosition(self.back_left.get_position(), Rotation2d(self.back_left.get_position())),
+    #             SwerveModulePosition(self.back_right.get_position(), Rotation2d(self.back_right.get_position()))
+    #             )
+    # def getModuleStates(self) -> tuple[SwerveModuleState, SwerveModuleState, SwerveModuleState, SwerveModuleState]:
+    #     return (
+    #         SwerveModuleState(self.front_left.get_position(), Rotation2d(self.front_left.getAbsoluteEncoderRad())),
+    #             SwerveModuleState(self.front_right.get_position(), Rotation2d(self.front_right.getAbsoluteEncoderRad())),
+    #             SwerveModuleState(self.back_left.get_position(), Rotation2d(self.back_left.getAbsoluteEncoderRad())),
+    #             SwerveModuleState(self.back_right.get_position(), Rotation2d(self.back_right.getAbsoluteEncoderRad()))
+    #     )
 
     # def getChassisSpeeds(self):
     #     return DrivingConstants.kinematics.toChassisSpeeds(self.getModuleStates())
@@ -354,12 +363,12 @@ class DriveSubsystem(Subsystem):
 
         :returns: The turn rate of the robot, in degrees per second
         """
-        return self.gyro.getRate() * (-1.0 if DrivingConstants.KGyroReversed else 1.0)
+        return self.gyro.getRate() * (-1.0 if RobotConstants.K_GYRO_REVERSED else 1.0)
     
 
     def stop(self) -> None:
         """Stops the module."""
-        self.drive(0, 0, 0, False, False)
+        self.drive(0, 0, 0, False)
 
 
     # def publishSwerveStates(self):

@@ -4,7 +4,7 @@ import commands2
 from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters, SimpleMotorFeedforwardRadians
 from constants import DriveConstants
 
-from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, ClosedLoopSlot
+from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, ClosedLoopSlot, SparkClosedLoopController
 
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
@@ -27,6 +27,9 @@ class MAXSwerveModule(commands2.SubsystemBase):
             # Setup encoders for the drive and turning motors.
         self.driveEncoder = self.driveMotor.getEncoder()
         self.turningEncoder = self.turningMotor.getAbsoluteEncoder()
+
+        self.drivingClosedLoopController = self.driveMotor.getClosedLoopController()
+        self.turningClosedLoopController = self.turningMotor.getClosedLoopController()
 
         driveMotorConfig = SparkMaxConfig()
         turnMotorConfig = SparkMaxConfig()
@@ -81,6 +84,8 @@ class MAXSwerveModule(commands2.SubsystemBase):
         correctedDesiredState.angle = desiredState.angle + Rotation2d(self.chassis_angular_offset)
         correctedDesiredState.optimize(Rotation2d(self.turningEncoder.getPosition()))
 
+        self.drivingClosedLoopController.setReference(correctedDesiredState.speed, SparkBase.ControlType.kVelocity)
+        self.turningClosedLoopController.setReference(correctedDesiredState.angle.radians(), SparkBase.ControlType.kPosition)
         
         self.desiredState = desiredState
 

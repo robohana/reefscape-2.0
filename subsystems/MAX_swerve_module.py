@@ -73,22 +73,27 @@ class MAXSwerveModule(commands2.SubsystemBase):
         )
  
 
-    def setDesiredState(self, state: SwerveModuleState):
+    def setDesiredState(self, desiredState: SwerveModuleState):
         """Sets the desired state of the module, using PID and feedforward for the drive motor."""
-        self.desiredState = state
-        state.optimize(self.getState().angle)
-        if math.isclose(state.speed, 0):
+        correctedDesiredState = SwerveModuleState()
+        correctedDesiredState.speed = desiredState.speed
+        correctedDesiredState.angle = desiredState.angle + Rotation2d(self.chassis_angular_offset)
+        correctedDesiredState.optimize(Rotation2d(self.turningEncoder.getPosition()))
+        if math.isclose(desiredState.speed, 0):
             self.driveMotor.stopMotor()
         else:
-            self.drivePIDController.setReference(state.speed, SparkBase.ControlType.kVelocity)
+            self.drivePIDController.setReference(correctedDesiredState.speed, SparkBase.ControlType.kVelocity)
 
         try:
             # For the turning motor, we typically use PID control.
-            turningOutput = self.turningPIDController.calculate(self.getState().angle, state.angle.radians())
+            turningOutput = self.turningPIDController.calculate(self.getState().angle, correctedDesiredState.angle.radians())
             self.turningMotor.set(turningOutput)
         except Exception as e:
             print(f"Turning motor set error: {e}")
             self.turningMotor.set(0)
+
+        
+        self.desiredState = correctedDesiredState
 
 
     def stop(self):

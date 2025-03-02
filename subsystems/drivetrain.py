@@ -243,9 +243,9 @@ class DriveSubsystem(Subsystem):
             #     self.currentRotation = rot
 
             # Convert the commanded speeds into the correct units for the drivetrain
-            x_speed_delivered = xSpeed * DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND
-            y_speed_delivered = ySpeed * DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND
-            rot_delivered = rot * DriveConstants.K_TELE_DRIVE_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND
+            x_speed_delivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond
+            y_speed_delivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond
+            rot_delivered = rot * DriveConstants.kMaxAngularSpeed
 
             swerveModuleStates = RobotConstants.KINEMATICS.toSwerveModuleStates(
                 ChassisSpeeds.fromFieldRelativeSpeeds(

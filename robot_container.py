@@ -1,7 +1,16 @@
+# Type: RobotContainer
+'''
+# The RobotContainer is where you will configure your robot. The container is where you will define your subsystems, commands, and button bindings. 
+#The container is created in robot.py and passed to the TimedCommandRobot. 
+#The TimedCommandRobot will call the getAutonomousCommand method to get the command to run during autonomous. 
+#The container will also set the default commands for the subsystems
+
+ '''
+
 import math
 
 import commands2
-from commands2 import Command, CommandScheduler, cmd, InstantCommand
+from commands2 import Command, CommandScheduler, cmd, InstantCommand, RunCommand
 import wpimath
 import wpilib
 
@@ -19,12 +28,11 @@ from wpimath.controller import (
     ProfiledPIDControllerRadians,
 )
 
-from subsystems.drivetrain import DriveSubsystem
-from constants.oi_constants import OIConstants
-from commands.SwerveJoystickCmd import SwerveJoystickCmd
+from constants import AutoConstants, OIConstants
+from subsystems.drivesubsystem import DriveSubsystem
+from TeleopCommands.SwerveJoystickCmd import SwerveJoystickCmd
 
-
-import commands.auto_routines
+import AutoCommands.SimpleAuto
 
 
 class RobotContainer:
@@ -36,47 +44,59 @@ class RobotContainer:
     """
 
     def __init__(self) -> None:
+
+        self.driver_controller = wpilib.XboxController(OIConstants.kDriverControllerPort)
+        self.operatorController = wpilib.XboxController(OIConstants.kOperatorControllerPort)
+        # The robot's subsystems
         self.robot_drive = DriveSubsystem()
-
-        # Other subsystems here
-
-        self.driver_controller = wpilib.XboxController(OIConstants.K_DRIVER_CONTROLLER_PORT)
+        self.setDefaultCommand()
+        self.configureButtonBindings()
 
 
-        # self.robot_drive.setDefaultCommand(
-        #     RunCommand(
-        #         lambda: self.robot_drive.drive(
-        #             -wpimath.applyDeadband(self.driver_controller.getLeftY(), OIConstants.DEADZONE),
-        #             -wpimath.applyDeadband(self.driver_controller.getLeftX(), OIConstants.DEADZONE),
-        #             -wpimath.applyDeadband(self.driver_controller.getRightX(), OIConstants.DEADZONE),
-        #             True,
-        #         ),
-        #         self.robot_drive
+        # self.robotDrive.setDefaultCommand(
+        #     SwerveJoystickCmd(self.robotDrive, self.driverController)
+        # )
+
+        # # Configure default commands
+        # self.robotDrive.setDefaultCommand(
+        #     SwerveJoystickCmd(
+        #         robotDrive = self.robotDrive, driverController = self.driverController
         #     )
         # )
-        self.robot_drive.setDefaultCommand(SwerveJoystickCmd(self.robot_drive, self.driver_controller))
         
-        
-        
-        self.configure_button_bindings()
+        # Configure the button bindings
 
-            
+    def setDefaultCommand (self) -> None:
+        self.robot_drive.setDefaultCommand(
+            RunCommand(
+                lambda: self.robot_drive.drive(
+                    -wpimath.applyDeadband(self.driver_controller.getLeftY(), OIConstants.deadzone),
+                    -wpimath.applyDeadband(self.driver_controller.getLeftX(), OIConstants.deadzone),
+                    -wpimath.applyDeadband(self.driver_controller.getRightX(), OIConstants.deadzone),
+                    True
+                ),
+                self.robot_drive 
+            ) 
+        )
 
-    # def debug_drive(self):
-    #     y = -wpimath.applyDeadband(self.driver_controller.getLeftY(), OIConstants.DEADZONE)
-    #     x = -wpimath.applyDeadband(self.driver_controller.getLeftX(), OIConstants.DEADZONE)
-    #     rotation = -wpimath.applyDeadband(self.driver_controller.getRightX(), OIConstants.DEADZONE)
 
-    #     #print(f"Driving: Y={y}, X={x}, Rotation={rotation}")
-    #     self.robot_drive.drive(y, x, rotation, True)
-    #     #print ("in containers")
-        
-    def configure_button_bindings(self) -> None:
+    def configureButtonBindings(self) -> None:
+        """
+        Use this method to define your button->command mappings. Buttons can be created by
+        instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
+        and then passing it to a JoystickButton.
+        # """
+        # self.robotDrive.setDefaultCommand(SwerveJoystickCmd(self.robotDrive, self.driverController))
+
+    def disablePIDSubsystems(self) -> None:
+        """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
+        This should be called on robot disable to prevent integral windup."""
         pass
-        # if abs(self.driver_controller.getLeftY()) > 0.1:  # Threshold for when the stick is held
-        #     self.robot_drive.set_x_command()  # Trigger the command based on stick position
 
-    def get_autonomous_command(self) -> commands2.Command:
-        return commands.auto_routines
-       
+    def getAutonomousCommand(self) -> commands2.Command:
+        """Use this to pass the autonomous command to the main {@link Robot} class.
 
+        :returns: the command to run in autonomous
+        """
+        pass
+        #return AutoCommands.SimpleAuto(self.robotDrive)

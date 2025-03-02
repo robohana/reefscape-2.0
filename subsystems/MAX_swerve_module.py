@@ -21,9 +21,9 @@ class MAXSwerveModule(commands2.SubsystemBase):
         print("NetworkTables started: SwerveDebug should be available")
 
 
-        drivingFactor = DriveConstants.K_WHEEL_DIAMETER_METERS * pi / DriveConstants.K_DRIVE_MOTOR_REDUCTION
+        drivingFactor = DriveConstants.K_WHEEL_DIAMETER_METERS * pi / DriveConstants.kDrivingMotorReduction
         turningFactor = 2 * pi
-        drivingVelocityFeedForward = 1 / DriveConstants.K_DRIVE_WHEEL_FREE_SPIN_RPS
+        drivingVelocityFeedForward = 1 / DriveConstants.kDriveWheelFreeSpeedRps
 
 
         self.driveMotor = SparkMax(driveMotorChannel, SparkMax.MotorType.kBrushless)

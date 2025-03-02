@@ -8,25 +8,38 @@ robotPeriodic() methods at the bottom of this file should generally remain uncha
 
 '''
 
+
+import commands2
+from commands2 import CommandScheduler
 import wpilib
-
-from commands2 import CommandScheduler, TimedCommandRobot
-
-from robot_container import RobotContainer
+import typing
+from robotcontainer import RobotContainer
 
 
-class MyRobot(TimedCommandRobot):
+class MyRobot(commands2.TimedCommandRobot):
     def robotInit(self) -> None:
-        # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-        # autonomous chooser on the dashboard.
-        print("Robot is initializing...")  # Debug output
+        # Instantiate our RobotContainer.  
         self.container = RobotContainer()
-        print("RobotContainer initialized!")  
-        self.autonomous_command = self.container.get_autonomous_command()
+        #self.autonomousCommand = None
+
+        self.driver_controller = self.container.driver_controller
+
+        #self.drive = self.Container.drive
+        self.robotDrive = self.container.robot_drive
+        #CommandScheduler.getInstance().registerSubsystem(self.robotDrive)
+
+        global robotDrive #expose the drive subsystem globally (nothing can go wrong, right?)
+
+        robotDrive = self.robotDrive
+
+
+        wpilib.DataLogManager.start()  # Start logging
+        wpilib.DriverStation.startDataLog(wpilib.DataLogManager.getLog())  # Log joystick inputs
+        print("WPILib Data Logging Enabled")
+
 
     def robotPeriodic(self) -> None:
         CommandScheduler.getInstance().run()
-        pass
 
     def disabledInit(self) -> None:
         pass
@@ -37,26 +50,26 @@ class MyRobot(TimedCommandRobot):
     def autonomousInit(self) -> None:
         pass
         #print("Starting Autonomous... ")
-        if self.autonomous_command is not None:
-            self.autonomous_command.schedule()
+        #self.autonomousCommand = self.container.getAutonomousCommand()
+        #if self.autonomousCommand is not None:
+        #    self.autonomousCommand.schedule()
 
     def autonomousPeriodic(self) -> None:
         pass
 
     def teleopInit(self) -> None:
-        print("Teleop is running!")  # Debug output
-        #CommandScheduler.getInstance().run()
-
+        pass
+        #print("Starting TeleOp... ")
+        #SwerveModule.resetEncoders()
 
     def teleopPeriodic(self) -> None:
         pass
-    
+
     def testInit(self) -> None:
-        CommandScheduler.getInstance().cancelAll()
+        CommandScheduler.getInstance().run()
 
     def testPeriodic(self) -> None:
         pass
-
 
 
 if __name__ == "__main__":

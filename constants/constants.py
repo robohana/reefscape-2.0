@@ -55,13 +55,13 @@ class DriveConstants:
     
     # I don't know what to call these yet
     # Conversion from encoder rotations to meters (drive)
-    K_DRIVE_ENCODER_ROT2METER = kDrivingMotorReduction * pi * K_WHEEL_DIAMETER_METERS
+    # K_DRIVE_ENCODER_ROT2METER = kDrivingMotorReduction * pi * K_WHEEL_DIAMETER_METERS
 
     # Conversion from encoder rotations to radians (turn)
     # K_TURN_ENCODER_ROT2RAD = K_TURN_ENCODER_GEAR_RATIO * pi * 2  
 
     # Conversion from encoder RPM to meters per second (drive)
-    K_DRIVE_ENCODER_RPM2METER_PER_SEC = K_DRIVE_ENCODER_ROT2METER / 60
+    # K_DRIVE_ENCODER_RPM2METER_PER_SEC = K_DRIVE_ENCODER_ROT2METER / 60
 
     # Conversion from encoder RPM to radians per second (turn)
     # K_TURN_ENCODER_RPM2RAD_PER_SEC = K_TURN_ENCODER_ROT2RAD / 60
@@ -69,16 +69,17 @@ class DriveConstants:
 
     # Movement Constants
     # Physical robot movement limits (in feet and meters)
-    K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND = 4.8
+    kMaxSpeedMetersPerSecond = 4.8
+    kMaxAngularSpeed = 2 * pi
 
     # Physical max angular velocity (in meters per second)
-    K_PHYSICAL_MAX_ANGULAR_VELOCITY_METERS_PER_SECOND = K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND / K_WHEEL_RADIUS_METERS  # rad/s
+    # K_PHYSICAL_MAX_ANGULAR_VELOCITY_METERS_PER_SECOND = K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND / K_WHEEL_RADIUS_METERS  # rad/s
 
     # Teleop drive limits (adjustments for speed, angular speed, and acceleration)
-    K_TELE_DRIVE_MAX_SPEED_METERS_PER_SECOND = K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND / 1  # to be adjusted
-    K_TELE_DRIVE_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = (K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND * 2 / K_WHEEL_DIAMETER_METERS) / 2  # rad/s
-    K_TELE_DRIVE_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3  # to be adjusted
-    K_TELE_DRIVE_MAX_ANGULAR_ACCELERATION_UNITS_PER_SECOND = 3  # to be adjusted 
+    # K_TELE_DRIVE_MAX_SPEED_METERS_PER_SECOND = K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND / 1  # to be adjusted
+    # K_TELE_DRIVE_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = (kMaxSpeedMetersPerSecond * 2 / K_WHEEL_DIAMETER_METERS) / 2  # rad/s
+    # K_TELE_DRIVE_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3  # to be adjusted
+    # K_TELE_DRIVE_MAX_ANGULAR_ACCELERATION_UNITS_PER_SECOND = 3  # to be adjusted 
 
 
 

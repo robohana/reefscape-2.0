@@ -7,26 +7,12 @@
 
  '''
 
-import math
 
 import commands2
 from commands2 import Command, CommandScheduler, cmd, InstantCommand, RunCommand
 import wpimath
 import wpilib
 
-from wpimath.filter import SlewRateLimiter
-from wpimath.controller import PIDController, ProfiledPIDControllerRadians
-from wpimath.geometry import Pose2d, Rotation2d, Translation2d
-from wpimath.trajectory import (
-    TrajectoryConfig,
-    TrajectoryGenerator,
-    TrapezoidProfileRadians,
-)
-from wpimath.controller import (
-    HolonomicDriveController,
-    PIDController,
-    ProfiledPIDControllerRadians,
-)
 
 from constants import AutoConstants, OIConstants
 from subsystems.drivesubsystem import DriveSubsystem
@@ -46,12 +32,12 @@ class RobotContainer:
     def __init__(self) -> None:
 
 
-        self.driver_controller = wpilib.XboxController(OIConstants.kDriverControllerPort)
-        self.operatorController = wpilib.XboxController(OIConstants.kOperatorControllerPort)
+        self.driver_controller = wpilib.XboxController(OIConstants.K_DRIVER_CONTROLLER_PORT)
+        self.operator_controller = wpilib.XboxController(OIConstants.K_OPERATOR_CONTROLLER_PORT)
         # The robot's subsystems
         self.robot_drive = DriveSubsystem()
-        self.setDefaultCommand()
-        self.configureButtonBindings()
+        self.set_default_command()
+        self.configure_button_bindings()
 
 
         # self.robotDrive.setDefaultCommand(
@@ -67,14 +53,14 @@ class RobotContainer:
         
         # Configure the button bindings
 
-    def setDefaultCommand (self) -> None:
+    def set_default_command (self) -> None:
 
         self.robot_drive.setDefaultCommand(
             RunCommand(
                 lambda: self.robot_drive.drive(
-                    wpimath.applyDeadband(self.driver_controller.getLeftY() * -1, OIConstants.deadzone),
-                    wpimath.applyDeadband(self.driver_controller.getLeftX() * -1, OIConstants.deadzone),
-                    wpimath.applyDeadband(self.driver_controller.getRightX() * -1, OIConstants.deadzone),
+                    wpimath.applyDeadband(self.driver_controller.getLeftY() * -1, OIConstants.DEADZONE),
+                    wpimath.applyDeadband(self.driver_controller.getLeftX() * -1, OIConstants.DEADZONE),
+                    wpimath.applyDeadband(self.driver_controller.getRightX() * -1, OIConstants.DEADZONE),
                     True
                 ),
                 self.robot_drive 
@@ -82,7 +68,7 @@ class RobotContainer:
         )
 
 
-    def configureButtonBindings(self) -> None:
+    def configure_button_bindings(self) -> None:
         """
         Use this method to define your button->command mappings. Buttons can be created by
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),

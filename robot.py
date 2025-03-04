@@ -12,7 +12,6 @@ robotPeriodic() methods at the bottom of this file should generally remain uncha
 import commands2
 from commands2 import CommandScheduler
 import wpilib
-import typing
 from robotcontainer import RobotContainer
 
 
@@ -22,15 +21,15 @@ class MyRobot(commands2.TimedCommandRobot):
         self.container = RobotContainer()
         #self.autonomousCommand = None
 
-        self.driver_controller = self.container.driver_controller
+        #self.driver_controller = self.container.driver_controller
 
         #self.drive = self.Container.drive
-        self.robotDrive = self.container.robot_drive
+        #self.robotDrive = self.container.robot_drive
         #CommandScheduler.getInstance().registerSubsystem(self.robotDrive)
 
-        global robotDrive #expose the drive subsystem globally (nothing can go wrong, right?)
+        # global robotDrive #expose the drive subsystem globally (nothing can go wrong, right?)
 
-        robotDrive = self.robotDrive
+        # robotDrive = self.robotDrive
 
 
         wpilib.DataLogManager.start()  # Start logging

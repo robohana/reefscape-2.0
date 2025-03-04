@@ -3,17 +3,13 @@
 This file contains the DriveSubsystem class, which represents the drive subsystem of the robot.
 
 '''
-import math
+
 import typing
 import time
-import struct
-import threading
-from wpilib import DriverStation
 
-import wpilib
+import threading
 
 from commands2 import Subsystem
-from wpimath.filter import SlewRateLimiter
 from wpimath.geometry import Pose2d, Rotation2d
 from wpimath.kinematics import (
     ChassisSpeeds,
@@ -25,13 +21,12 @@ from wpimath.kinematics import (
 
 from constants import RobotConstants, DriveConstants
 from wpilib import SmartDashboard as sd
-import swerveutils
+
 from subsystems.MAXSwerveModule import MAXSwerveModule
 from navx import AHRS
 import navx
-from ntcore import NetworkTableInstance, StructPublisher, StructArrayPublisher
 import time
-import commands2
+
 
 
 
@@ -48,41 +43,40 @@ class DriveSubsystem(Subsystem):
     def __init__(self) -> None:
         super().__init__()
 
-        self.nt = NetworkTableInstance.getDefault()
-        self.swerveTable = self.nt.getTable("Swerve")
+        # self.nt = NetworkTableInstance.getDefault()
+        # self.swerveTable = self.nt.getTable("Swerve")
 
-                #  **Create Struct Publishers for AdvantageScope**
-        self.moduleStatesPublisher: StructArrayPublisher = (
-            self.swerveTable.getStructArrayTopic("Drive/Modules/States", SwerveModuleState).publish()
-        )
-        self.desiredModuleStatesPublisher: StructArrayPublisher = (
-            self.swerveTable.getStructArrayTopic("Drive/Modules/DesiredStates", SwerveModuleState).publish()
-        )
-        self.chassisSpeedsPublisher: StructPublisher = (
-            self.swerveTable.getStructTopic("Drive/ChassisSpeeds", ChassisSpeeds).publish()
-        )
+        #         #  **Create Struct Publishers for AdvantageScope**
+        # self.moduleStatesPublisher: StructArrayPublisher = (
+        #     self.swerveTable.getStructArrayTopic("Drive/Modules/States", SwerveModuleState).publish()
+        # )
+        # self.desiredModuleStatesPublisher: StructArrayPublisher = (
+        #     self.swerveTable.getStructArrayTopic("Drive/Modules/DesiredStates", SwerveModuleState).publish()
+        # )
+        # self.chassisSpeedsPublisher: StructPublisher = (
+        #     self.swerveTable.getStructTopic("Drive/ChassisSpeeds", ChassisSpeeds).publish()
+        # )
 
         # Create swerve modules
         self.front_left = MAXSwerveModule(RobotConstants.K_FRONT_LEFT_DRIVE_ID, 
                                                    RobotConstants.K_FRONT_LEFT_TURN_ID, 
                                                    RobotConstants.K_FRONT_LEFT_CHASSIS_ANGULAR_OFFSET
-)
+            )
         
         self.front_right = MAXSwerveModule(RobotConstants.K_FRONT_RIGHT_DRIVE_ID, 
                                                     RobotConstants.K_FRONT_RIGHT_TURN_ID, 
                                                     RobotConstants.K_FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET
-)
+            )
         
         self.back_left = MAXSwerveModule(RobotConstants.K_BACK_LEFT_DRIVE_ID, 
                                                   RobotConstants.K_BACK_LEFT_TURN_ID, 
                                                   RobotConstants.K_BACK_LEFT_CHASSIS_ANGULAR_OFFSET 
-)
+            )
         
         self.back_right = MAXSwerveModule(RobotConstants.K_BACK_RIGHT_DRIVE_ID, 
                                                    RobotConstants.K_BACK_RIGHT_TURN_ID, 
                                                    RobotConstants.K_BACK_RIGHT_CHASSIS_ANGULAR_OFFSET
-
-)
+            )
 
         #self.gyro = wpilib.ADXRS450_Gyro()
         self.gyro = AHRS(comType=navx._navx.AHRS.NavXComType.kMXP_SPI)
@@ -113,9 +107,9 @@ class DriveSubsystem(Subsystem):
         thread.start()
 
     def periodic(self) -> None:
-        sd.putNumber("Gyro", self.getHeading())
+        sd.putNumber("Gyro", self.get_heading())
         self.odometry.update(
-            self.getRotation2d(), 
+            self.get_rotation_2d(), 
                 (       
                     self.front_left.get_position(),
                     self.front_right.get_position(),
@@ -153,9 +147,9 @@ class DriveSubsystem(Subsystem):
         """
         return self.odometry.getPose()
 
-    def resetOdometry(self, pose: Pose2d):
+    def reset_odometry(self, pose: Pose2d):
         self.odometry.resetPosition(
-            self.getRotation2d(),
+            self.get_rotation_2d(),
             (
                 self.front_left.get_position(),
                 self.front_right.get_position(),
@@ -165,18 +159,18 @@ class DriveSubsystem(Subsystem):
             pose,
         )
 
-    def drive(self, xSpeed: float, ySpeed: float, rot: float, fieldRelative: bool) -> None:
+    def drive(self, x_speed: float, y_speed: float, rot: float, field_relative: bool) -> None:
             """Method to drive the robot using joystick info.
 
-            :param xSpeed:        Speed of the robot in the x direction (forward).
-            :param ySpeed:        Speed of the robot in the y direction (strafe).
+            :param x_speed:        Speed of the robot in the x direction (forward).
+            :param y_speed:        Speed of the robot in the y direction (strafe).
             :param rot:           Angular rate of the robot.
-            :param fieldRelative: Whether the provided x and y speeds are relative to the
+            :param field_relative: Whether the provided x and y speeds are relative to the
                                 field.
-            :param rateLimit:     Whether to enable rate limiting for smoother control.
+            :param rate_limit:     Whether to enable rate limiting for smoother control.
             """
 
-            print(f"Drive() Called - X:{xSpeed:.2f}, Y:{ySpeed:.2f}, Rot:{rot:.2f}")
+            # print(f"Drive() Called - X:{xSpeed:.2f}, Y:{ySpeed:.2f}, Rot:{rot:.2f}")
 
 
             # if rateLimit:
@@ -243,18 +237,18 @@ class DriveSubsystem(Subsystem):
             #     self.currentRotation = rot
 
             # Convert the commanded speeds into the correct units for the drivetrain
-            x_speed_delivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond
-            y_speed_delivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond
-            rot_delivered = rot * DriveConstants.kMaxAngularSpeed
+            x_speed_delivered = x_speed * DriveConstants.K_MAX_SPEED_METERS_PER_SECOND
+            y_speed_delivered = y_speed * DriveConstants.K_MAX_SPEED_METERS_PER_SECOND
+            rot_delivered = rot * DriveConstants.K_MAX_ANGULAR_SPEED
 
-            swerveModuleStates = RobotConstants.KINEMATICS.toSwerveModuleStates(
+            swerve_module_states = RobotConstants.KINEMATICS.toSwerveModuleStates(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                     x_speed_delivered,
                     y_speed_delivered,
                     rot_delivered,
                     Rotation2d.fromDegrees(self.gyro.getAngle()),
                 )
-                if fieldRelative
+                if field_relative
                 else ChassisSpeeds(x_speed_delivered, y_speed_delivered, rot_delivered)
             )
             # fl, fr, rl, rr = SwerveDrive4Kinematics.desaturateWheelSpeeds(
@@ -262,27 +256,26 @@ class DriveSubsystem(Subsystem):
             # )
         
             SwerveDrive4Kinematics.desaturateWheelSpeeds(
-                swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond
+                swerve_module_states, DriveConstants.K_MAX_SPEED_METERS_PER_SECOND
             )
 
-            fl, fr, bl, br = swerveModuleStates
-            self.front_left.setDesiredState(fl)
-            self.front_right.setDesiredState(fr)
-            self.back_left.setDesiredState(bl)
-            self.back_right.setDesiredState(br)
+            self.front_left.set_desired_state(swerve_module_states[0])
+            self.front_right.set_desired_state(swerve_module_states[1])
+            self.back_left.set_desired_state(swerve_module_states[2])
+            self.back_right.set_desired_state(swerve_module_states[3])
  
-    def setX(self) -> None:
+    def set_x(self) -> None:
         """Sets the wheels into an X formation to prevent movement."""
-        self.front_left.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(45)))
-        self.front_right.setDesiredState(
+        self.front_left.set_desired_state(SwerveModuleState(0, Rotation2d.fromDegrees(45)))
+        self.front_right.set_desired_state(
             SwerveModuleState(0, Rotation2d.fromDegrees(-45))
         )
-        self.back_left.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(-45)))
-        self.back_right.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(45)))        
+        self.back_left.set_desired_state(SwerveModuleState(0, Rotation2d.fromDegrees(-45)))
+        self.back_right.set_desired_state(SwerveModuleState(0, Rotation2d.fromDegrees(45)))        
 
-    def setModuleStates(
+    def set_module_states(
         self,
-        desiredStates: typing.Tuple[
+        desired_states: typing.Tuple[
             SwerveModuleState, SwerveModuleState, SwerveModuleState, SwerveModuleState
         ],
     ) -> None:
@@ -292,15 +285,13 @@ class DriveSubsystem(Subsystem):
         """
         
         SwerveDrive4Kinematics.desaturateWheelSpeeds(
-            desiredStates, DriveConstants.kMaxSpeedMetersPerSecond
+            desired_states, DriveConstants.K_MAX_SPEED_METERS_PER_SECOND
             )
 
-        fl, fr, bl, br = desiredStates
-
-        self.front_left.setDesiredState(fl)
-        self.front_right.setDesiredState(fr)
-        self.back_left.setDesiredState(bl)
-        self.back_right.setDesiredState(br)
+        self.front_left.set_desired_state(desired_states[0])
+        self.front_right.set_desired_state(desired_states[1])
+        self.back_left.set_desired_state(desired_states[2])
+        self.back_right.set_desired_state(desired_states[3])
 
 
     # def getModulePositionsOld(self) -> tuple[SwerveModulePosition, SwerveModulePosition,SwerveModulePosition,SwerveModulePosition]:
@@ -328,19 +319,13 @@ class DriveSubsystem(Subsystem):
 
 
 
-    def resetEncoders(self) -> None:
-        """Resets the drive encoders to currently read a position of 0."""
-        self.front_left.resetEncoders()
-        self.front_right.resetEncoders()
-        self.back_left.resetEncoders()
-        self.back_right.resetEncoders()
+   
 
-
-    def zeroHeading(self) -> None:
+    def zero_heading(self) -> None:
         """Zeroes the heading of the robot."""
         self.gyro.reset()
 
-    def getHeading(self) -> float:
+    def get_heading(self) -> float:
         """Returns the heading of the robot.
 
         :returns: the robot's heading in degrees, from -180 to 180
@@ -349,16 +334,16 @@ class DriveSubsystem(Subsystem):
         #return Rotation2d.fromDegrees(self.gyro.getAngle() * (-1.0 if DrivingConstants.KGyroReversed else 1.0)).degrees()
 
 
-    def getRotation2d(self) -> Rotation2d:
-        return Rotation2d.fromDegrees(self.getHeading())
+    def get_rotation_2d(self) -> Rotation2d:
+        return Rotation2d.fromDegrees(self.get_heading())
     
         #^used when we are able to adjust gyro with apriltags
-    def setHeading(self, angle):
+    def set_heading(self, angle):
         self.gyro.reset()
         self.gyro.setAngleAdjustment(angle)
 
 
-    def getTurnRate(self) -> float:
+    def get_turn_rate(self) -> float:
         """Returns the turn rate of the robot.
 
         :returns: The turn rate of the robot, in degrees per second
@@ -415,7 +400,7 @@ class DriveSubsystem(Subsystem):
     #     self.swerveTable.getStructTopic("ChassisSpeeds", ChassisSpeeds).publish().set(chassisSpeeds)
 
 
-    def getModuleStates(self):
+    def get_module_states(self):
         """Returns the current states of all swerve modules."""
         return [
             self.front_left.getState(),

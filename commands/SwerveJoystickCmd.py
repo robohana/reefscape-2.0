@@ -9,15 +9,15 @@ from wpilib import SmartDashboard as sd
 
 class SwerveJoystickCmd(Command):
 
-    def __init__(self, robotDrive: DriveSubsystem, driverController:XboxController):
+    def __init__(self, robot_drive: DriveSubsystem, driver_controller:XboxController):
         super().__init__()
-        self.robotDrive = robotDrive
-        self.driverController = driverController
-        self.addRequirements(self.robotDrive)
+        self.robot_drive = robot_drive
+        self.driver_controller = driver_controller
+        self.addRequirements(self.robot_drive)
         # create Slew limiter
-        self.xLimiter = SlewRateLimiter(1)
-        self.yLimiter = SlewRateLimiter(1)
-        self.zRotLimiter = SlewRateLimiter(1)
+        self.x_limiter = SlewRateLimiter(1)
+        self.y_limiter = SlewRateLimiter(1)
+        self.z_rot_limiter = SlewRateLimiter(1)
 
         
 
@@ -26,30 +26,30 @@ class SwerveJoystickCmd(Command):
     
     def execute(self):
         # these are multiplied by the drivingSpeedLimiter which limit the speed of the robot so it doesn't go too fast
-        self.xSpeed = -self.driverController.getLeftX() * DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND # self.drivingLimiter#* RobotConstants.kTeleopDriveMaxSpeedMetersPerSecond
-        self.ySpeed = -self.driverController.getLeftY() * DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND # self.drivingLimiter #* RobotConstants.kTeleopDriveMaxSpeedMetersPerSecond
-        self.zRotation = -self.driverController.getRightX() * DriveConstants.K_TELE_DRIVE_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND # self.drivingLimiter
+        self.x_speed = self.driver_controller.getLeftY() #* DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND # self.drivingLimiter#* RobotConstants.kTeleopDriveMaxSpeedMetersPerSecond
+        self.y_speed = self.driver_controller.getLeftX() #* DriveConstants.K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND # self.drivingLimiter #* RobotConstants.kTeleopDriveMaxSpeedMetersPerSecond
+        self.z_rotation = self.driver_controller.getRightX() #* DriveConstants.K_TELE_DRIVE_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND # self.drivingLimiter
         
         # 1. Get the joystick values and apply deadzone
-        self.xSpeed = wpimath.applyDeadband(self.xSpeed, OIConstants.deadzone)
-        self.ySpeed = wpimath.applyDeadband(self.ySpeed, OIConstants.deadzone)
-        self.zRotation = wpimath.applyDeadband(self.zRotation, OIConstants.deadzone)
+        self.x_speed = wpimath.applyDeadband(self.x_speed, OIConstants.DEADZONE)
+        self.y_speed = wpimath.applyDeadband(self.y_speed, OIConstants.DEADZONE)
+        self.z_rotation = wpimath.applyDeadband(self.z_rotation, OIConstants.DEADZONE)
         
         # if self.fieldOriented:
-        chasisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(self.xSpeed, self.ySpeed, self.zRotation, self.robotDrive.getRotation2d())
-        sd.putNumber("chasisSpeeds", chasisSpeeds.vx)
+        chasis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(self.x_speed, self.y_speed, self.z_rotation, self.robot_drive.get_rotation_2d())
+        sd.putNumber("chasisSpeeds", chasis_speeds.vx)
         # else:
         # If robotOrinted is desired (But what's the fun in that?)
         #     chasisSpeeds = ChassisSpeeds(self.xSpeed, self.ySpeed, self.zRotation)
 
         # 3. convert chasis speeds to module states
-        moduleStates = RobotConstants.KINEMATICS.toSwerveModuleStates(chasisSpeeds)
+        module_states = RobotConstants.KINEMATICS.toSwerveModuleStates(chasis_speeds)
 
-        self.robotDrive.setModuleStates(moduleStates)
+        self.robot_drive.set_module_states(module_states)
         
 
     def end(self, interrupted: bool):
-        self.robotDrive.stop()
+        self.robot_drive.stop()
 
     def isFinished(self):
         return False

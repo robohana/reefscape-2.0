@@ -14,16 +14,16 @@ class DriveConstants:
 
     # Motion and Drive control limiters
     # Slew rate limits for different drive parameters
-    K_DIRECTION_SLEW_RATE = 1.2  # radians per second
-    K_MAGNITUDE_SLEW_RATE = 1.8  # percent per second (1 = 100%)
-    K_ROTATIONAL_SLEW_RATE = 2.0  # percent per second (1 = 100%)
+    # K_DIRECTION_SLEW_RATE = 1.2  # radians per second
+    # K_MAGNITUDE_SLEW_RATE = 1.8  # percent per second (1 = 100%)
+    # K_ROTATIONAL_SLEW_RATE = 2.0  # percent per second (1 = 100%)
 
-    # Speed limiters for drive and rotation
-    K_DRIVING_SPEED_LIMITER = 1  # Adjust this value as needed
-    K_ROTATION_SPEED_LIMITER = 1  # Adjust this value as needed
+    # # Speed limiters for drive and rotation
+    # K_DRIVING_SPEED_LIMITER = 1  # Adjust this value as needed
+    # K_ROTATION_SPEED_LIMITER = 1  # Adjust this value as needed
 
-    # Voltage limiter for controlling motor voltage
-    K_VOLTAGE_LIMITER = SlewRateLimiter(0.5)  # Assuming SlewRateLimiter takes a rate value (in volts or time scale)
+    # # Voltage limiter for controlling motor voltage
+    # K_VOLTAGE_LIMITER = SlewRateLimiter(0.5)  # Assuming SlewRateLimiter takes a rate value (in volts or time scale)
 
 # Drivetrain PID Constants
     K_DRIVE_P = 0.1
@@ -33,25 +33,25 @@ class DriveConstants:
     K_DRIVE_KS = 0.1
     K_DRIVE_KV = 1
 
-    K_TURN_P = 0.01
+    K_TURN_P = 1
     K_TURN_I = 0
     K_TURN_D = 0
 
     K_TURN_KS = 0.1
-    K_TURN_KV = 0.227
+    K_TURN_KV = 1
 
-    kDrivingMotorPinionTeeth = 14 
+    K_DRIVING_MOTOR_PINION_TEETH = 13
 
     K_WHEEL_DIAMETER_METERS = 0.0762
     K_WHEEL_RADIUS_METERS = K_WHEEL_DIAMETER_METERS / 2 # ~ 0.0508
-    kWheelCircumferenceMeters = K_WHEEL_DIAMETER_METERS * pi
+    K_WHEEL_CIRCUMFERENCE_METERS = K_WHEEL_DIAMETER_METERS * pi
 
    
-    kDrivingMotorReduction = (45.0 * 22) / (kDrivingMotorPinionTeeth * 15)
-    kFreeSpeedRpm = 5676
-    kDrivingMotorFreeSpeedRps = kFreeSpeedRpm / 60
+    K_DRIVING_MOTOR_REDUCTION = (45.0 * 22) / (K_DRIVING_MOTOR_PINION_TEETH * 15)
+    K_FREE_SPEED_RPM = 5676 # drive motor
+    K_DRIVING_MOTOR_FREE_SPEED_RPM = K_FREE_SPEED_RPM / 60
 
-    kDriveWheelFreeSpeedRps = (kDrivingMotorFreeSpeedRps * kWheelCircumferenceMeters) / kDrivingMotorReduction   
+    K_DRIVE_WHEEL_FREE_SPEED_RPS = (K_DRIVING_MOTOR_FREE_SPEED_RPM * K_WHEEL_CIRCUMFERENCE_METERS) / K_DRIVING_MOTOR_REDUCTION   
     
     # I don't know what to call these yet
     # Conversion from encoder rotations to meters (drive)
@@ -69,8 +69,8 @@ class DriveConstants:
 
     # Movement Constants
     # Physical robot movement limits (in feet and meters)
-    kMaxSpeedMetersPerSecond = 4.8
-    kMaxAngularSpeed = 2 * pi
+    K_MAX_SPEED_METERS_PER_SECOND = 4.46
+    K_MAX_ANGULAR_SPEED = 2 * pi
 
     # Physical max angular velocity (in meters per second)
     # K_PHYSICAL_MAX_ANGULAR_VELOCITY_METERS_PER_SECOND = K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND / K_WHEEL_RADIUS_METERS  # rad/s
@@ -87,17 +87,17 @@ class DriveConstants:
 class OIConstants:
     # Constants for the Operator Interface
 
-    kDriverControllerPort = 0
-    kOperatorControllerPort = 1
-    deadzone = 0.1
+    K_DRIVER_CONTROLLER_PORT = 0
+    K_OPERATOR_CONTROLLER_PORT = 1
+    DEADZONE = 0.1
 
 
 class RobotConstants:
 
         # Robot Dimemsions
-    K_TRACK_WIDTH = units.inchesToMeters(23.375) # ~0.584m
+    K_TRACK_WIDTH = units.inchesToMeters(23.375) # ~23 3/8 in, ~0.593725m
      # Distance between centers of right and left wheels
-    K_WHEEL_BASE = units.inchesToMeters(23.375) # ~0.584m
+    K_WHEEL_BASE = units.inchesToMeters(23.375) # ~23 3/8 in, ~0.593725m
      # Distance between centers of front and back wheels
 
 
@@ -109,28 +109,28 @@ class RobotConstants:
     K_FRONT_LEFT_TURN_ID = 22
     K_FRONT_LEFT_DRIVING_MOTOR_REVERSED = False
     K_FRONT_LEFT_TURNING_MOTOR_REVERSED = False
-    K_FRONT_LEFT_CHASSIS_ANGULAR_OFFSET = pi / 4
+    K_FRONT_LEFT_CHASSIS_ANGULAR_OFFSET = -pi / 2
 
     # Front right module constants
     K_FRONT_RIGHT_DRIVE_ID = 21
     K_FRONT_RIGHT_TURN_ID = 20
     K_FRONT_RIGHT_DRIVING_MOTOR_REVERSED = True
     K_FRONT_RIGHT_TURNING_MOTOR_REVERSED = False
-    K_FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET = -pi / 4
+    K_FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET = 0
 
     # Back left module constants
     K_BACK_LEFT_DRIVE_ID = 25
     K_BACK_LEFT_TURN_ID = 24
     K_BACK_LEFT_DRIVING_MOTOR_REVERSED = False
     K_BACK_LEFT_TURNING_MOTOR_REVERSED = False
-    K_BACK_LEFT_CHASSIS_ANGULAR_OFFSET = (3 * pi) / 4
+    K_BACK_LEFT_CHASSIS_ANGULAR_OFFSET = pi
 
     # Back right module constants
     K_BACK_RIGHT_DRIVE_ID = 27
     K_BACK_RIGHT_TURN_ID = 26
     K_BACK_RIGHT_DRIVING_MOTOR_REVERSED = True
     K_BACK_RIGHT_TURNING_MOTOR_REVERSED = False
-    K_BACK_RIGHT_CHASSIS_ANGULAR_OFFSET = -(3 * pi) / 4
+    K_BACK_RIGHT_CHASSIS_ANGULAR_OFFSET = pi/2
 
 
     K_FRONT_LEFT_LOCATION = Translation2d(K_WHEEL_BASE / 2 , K_TRACK_WIDTH / 2) 
@@ -149,8 +149,8 @@ class RobotConstants:
 
 
 class AutoConstants:
-    kMaxSpeedMetersPerSecond = 3
-    kMaxAccelerationMetersPerSecondSquared = 3
-    kMaxAngularSpeedRadiansPerSecond = pi
-    kMaxAngularSpeedRadiansPerSecondSquared = pi
+    K_MAX_SPEED_METERS_PER_SECOND = 3
+    K_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3
+    K_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = pi
+    K_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND_SQUARED = pi
     

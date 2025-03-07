@@ -49,3 +49,7 @@ Class Naming (**PascalCase**:) \
 | BACK_LEFT_STREER  | 24        |
 | BACK_RIGHT_DRIVE  | 27        |
 | BACK_RIGHT_STEER  | 26        |
+| INTAKE_MOTOR      | 33        |
+| ARM_MOTOR         | 31        |
+| ELEVATOR_MOTOR    | 32        |
+

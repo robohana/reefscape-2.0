@@ -9,16 +9,17 @@
 
 
 import commands2
-from commands2 import Command, CommandScheduler, cmd, InstantCommand, RunCommand
+from commands2 import Command, CommandScheduler, cmd, InstantCommand, RunCommand, button
 import wpimath
 import wpilib
+from wpilib import XboxController
 
+from subsystems.coral_subsystem import CoralSubsystem
+from constants import AutoConstants, OIConstants, Setpoint
+from subsystems.drivetrain import DriveSubsystem
+from commands.SwerveJoystickCmd import SwerveJoystickCmd
 
-from constants import AutoConstants, OIConstants
-from subsystems.drivesubsystem import DriveSubsystem
-from TeleopCommands.SwerveJoystickCmd import SwerveJoystickCmd
-
-import AutoCommands.SimpleAuto
+import commands.auto_routines
 
 
 class RobotContainer:
@@ -36,6 +37,7 @@ class RobotContainer:
         self.operator_controller = wpilib.XboxController(OIConstants.K_OPERATOR_CONTROLLER_PORT)
         # The robot's subsystems
         self.robot_drive = DriveSubsystem()
+        self.coral = CoralSubsystem()
         self.set_default_command()
         self.configure_button_bindings()
 
@@ -75,6 +77,15 @@ class RobotContainer:
         and then passing it to a JoystickButton.
         # """
         # self.robotDrive.setDefaultCommand(SwerveJoystickCmd(self.robotDrive, self.driverController))
+        if self.operator_controller.getLeftBumper(): CoralSubsystem.run_intake_command()
+        if self.operator_controller.getRightBumper(): CoralSubsystem.reverse_intake_command()   
+
+        if self.operator_controller.getBButton(): CoralSubsystem.setSetpointCommand(Setpoint.K_CORAL_STATION)
+        if self.operator_controller.getAButton(): CoralSubsystem.setSetpointCommand(Setpoint.K_LEVEL_2) 
+        if self.operator_controller.getYButton(): CoralSubsystem.setSetpointCommand(Setpoint.K_LEVEL_3) 
+
+        # if self.driver_controller.start(): self.robot_drive.zero_heading
+
 
     def disablePIDSubsystems(self) -> None:
         """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.

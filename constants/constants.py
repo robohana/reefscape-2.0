@@ -146,7 +146,43 @@ class RobotConstants:
         K_BACK_RIGHT_LOCATION
     )
 
+class Setpoint:
+    K_CORAL_STATION = "Coral Station"
+    K_LEVEL_1 = "1"
+    K_LEVEL_2 = "2"
+    K_LEVEL_3 = "3"
 
+    class Arm:
+        K_CORAL_STATION = 1 # 33 for rev
+        K_LEVEL_1 = 0
+        K_LEVEL_2 = 1 # 2 for rev
+        K_LEVEL_3 = 1 # 2 for rev
+
+    class Elevator:
+        K_CORAL_STATION = 0 
+        K_LEVEL_1 = 0
+        K_LEVEL_2 = 0
+        K_LEVEL_3 = 1   # 100 for rev 
+
+    class Intake:
+        K_FORWARD = 0.5
+        K_REVERSE = -0.5     
+
+class CoralSubsystemConstants:
+    # can Ids
+    K_ARM_MOTOR_CHANNEL = 31
+    K_ELEVATOR_MOTOR_CHANNEL = 32 
+    K_INTAKE_MOTOR_CHANNEL = 33 
+
+    class Arm:
+        K_P = 0.1
+        K_I = 0
+        K_D = 0
+
+    class Elevator:
+        K_P = 0.1
+        K_I = 0
+        K_D = 0
 
 class AutoConstants:
     K_MAX_SPEED_METERS_PER_SECOND = 3

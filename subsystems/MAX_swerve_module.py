@@ -27,7 +27,7 @@ class MAXSwerveModule(commands2.SubsystemBase):
         self.drive_motor = SparkMax(drive_motor_channel, SparkMax.MotorType.kBrushless)
         self.turn_motor = SparkMax(turn_motor_channel, SparkMax.MotorType.kBrushless)
 
-            # Setup encoders for the drive and turning motors.
+         # Setup encoders for the drive and turning motors.
         self.drive_encoder = self.drive_motor.getEncoder()
         self.turn_encoder = self.turn_motor.getAbsoluteEncoder()
 
@@ -60,7 +60,6 @@ class MAXSwerveModule(commands2.SubsystemBase):
 
         self.drive_motor.configure(drive_motor_config, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
         self.turn_motor.configure(turn_motor_config, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters) 
-
 
         self.desiredState = SwerveModuleState(0.0, Rotation2d())
         self.chassis_angular_offset = chassis_angular_offset

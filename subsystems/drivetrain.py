@@ -22,19 +22,8 @@ from wpimath.kinematics import (
 from constants import RobotConstants, DriveConstants
 from wpilib import SmartDashboard as sd
 
-from subsystems.MAXSwerveModule import MAXSwerveModule
-from navx import AHRS
-import navx
-import time
-
-
-
-
-
-last_print_time = 0  # Global variable to track last print time
-
-
-
+from subsystems.MAX_swerve_module import MAXSwerveModule
+from navx import AHRS, _navx
 
 
 class DriveSubsystem(Subsystem):
@@ -79,7 +68,7 @@ class DriveSubsystem(Subsystem):
             )
 
         #self.gyro = wpilib.ADXRS450_Gyro()
-        self.gyro = AHRS(comType=navx._navx.AHRS.NavXComType.kMXP_SPI)
+        self.gyro = AHRS(comType=_navx.AHRS.NavXComType.kMXP_SPI)
 
         # Slew rate filter variables for controlling lateral acceleration
         # self.currentRotation = 0.0

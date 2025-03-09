@@ -5,7 +5,7 @@ from math import pi
 from wpimath.filter import SlewRateLimiter
 from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
-from wpimath import kinematics, units
+from wpimath import units
 
 
 
@@ -45,7 +45,6 @@ class DriveConstants:
     K_WHEEL_DIAMETER_METERS = 0.0762
     K_WHEEL_RADIUS_METERS = K_WHEEL_DIAMETER_METERS / 2 # ~ 0.0508
     K_WHEEL_CIRCUMFERENCE_METERS = K_WHEEL_DIAMETER_METERS * pi
-
    
     K_DRIVING_MOTOR_REDUCTION = (45.0 * 22) / (K_DRIVING_MOTOR_PINION_TEETH * 15)
     K_FREE_SPEED_RPM = 5676 # drive motor
@@ -53,20 +52,6 @@ class DriveConstants:
 
     K_DRIVE_WHEEL_FREE_SPEED_RPS = (K_DRIVING_MOTOR_FREE_SPEED_RPM * K_WHEEL_CIRCUMFERENCE_METERS) / K_DRIVING_MOTOR_REDUCTION   
     
-    # I don't know what to call these yet
-    # Conversion from encoder rotations to meters (drive)
-    # K_DRIVE_ENCODER_ROT2METER = kDrivingMotorReduction * pi * K_WHEEL_DIAMETER_METERS
-
-    # Conversion from encoder rotations to radians (turn)
-    # K_TURN_ENCODER_ROT2RAD = K_TURN_ENCODER_GEAR_RATIO * pi * 2  
-
-    # Conversion from encoder RPM to meters per second (drive)
-    # K_DRIVE_ENCODER_RPM2METER_PER_SEC = K_DRIVE_ENCODER_ROT2METER / 60
-
-    # Conversion from encoder RPM to radians per second (turn)
-    # K_TURN_ENCODER_RPM2RAD_PER_SEC = K_TURN_ENCODER_ROT2RAD / 60
-
-
     # Movement Constants
     # Physical robot movement limits (in feet and meters)
     K_MAX_SPEED_METERS_PER_SECOND = 4.46
@@ -91,7 +76,6 @@ class OIConstants:
     K_OPERATOR_CONTROLLER_PORT = 1
     DEADZONE = 0.1
 
-
 class RobotConstants:
 
         # Robot Dimemsions
@@ -100,9 +84,7 @@ class RobotConstants:
     K_WHEEL_BASE = units.inchesToMeters(23.375) # ~23 3/8 in, ~0.593725m
      # Distance between centers of front and back wheels
 
-
     K_GYRO_REVERSED = False
-
     
     # Front left module constants
     K_FRONT_LEFT_DRIVE_ID = 23
@@ -153,20 +135,29 @@ class Setpoint:
     K_LEVEL_3 = "3"
 
     class Arm:
-        K_CORAL_STATION = 1 # 33 for rev
+        K_CORAL_STATION = -1 # 33 for rev
         K_LEVEL_1 = 0
-        K_LEVEL_2 = 1 # 2 for rev
-        K_LEVEL_3 = 1 # 2 for rev
+        K_LEVEL_2 = -1 # 2 for rev
+        K_LEVEL_3 = -1 # 2 for rev
 
     class Elevator:
         K_CORAL_STATION = 0 
         K_LEVEL_1 = 0
         K_LEVEL_2 = 0
-        K_LEVEL_3 = 1   # 100 for rev 
+        K_LEVEL_3 = 89   # 100 for rev 
 
     class Intake:
-        K_FORWARD = 0.5
-        K_REVERSE = -0.5     
+        K_FORWARD = 1
+        K_REVERSE = -1 
+        UP_POSITION = 1
+        DOWN_POSITION = -1
+
+    class Hang:
+        HANG = 1
+        K_FORWARD = 1
+        K_REVERSE = -1 
+        K_UP_POSITION = 1
+        K_DOWN_POSITION = -1     
 
 class CoralSubsystemConstants:
     # can Ids
@@ -175,14 +166,22 @@ class CoralSubsystemConstants:
     K_INTAKE_MOTOR_CHANNEL = 33 
 
     class Arm:
-        K_P = 0.1
+        K_P = 0.25
         K_I = 0
         K_D = 0
 
     class Elevator:
-        K_P = 0.1
+        K_P = 0.5
         K_I = 0
         K_D = 0
+        K_F = 0.25
+
+class HangSubSystemConstants:
+    K_HANG_MOTOR_CHANNEL = 34
+
+    K_P = 0.25
+    K_I = 0
+    K_D = 0    
 
 class AutoConstants:
     K_MAX_SPEED_METERS_PER_SECOND = 3

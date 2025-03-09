@@ -8,14 +8,12 @@ robotPeriodic() methods at the bottom of this file should generally remain uncha
 
 '''
 
-
-import commands2
-from commands2 import CommandScheduler
+from commands2 import CommandScheduler, TimedCommandRobot
 import wpilib
-from robotcontainer import RobotContainer
+from wpilib import DataLogManager, DriverStation, run
+from robot_container import RobotContainer
 
-
-class MyRobot(commands2.TimedCommandRobot):
+class MyRobot(TimedCommandRobot):
     def robotInit(self) -> None:
         # Instantiate our RobotContainer.  
         self.container = RobotContainer()
@@ -32,8 +30,8 @@ class MyRobot(commands2.TimedCommandRobot):
         # robotDrive = self.robotDrive
 
 
-        wpilib.DataLogManager.start()  # Start logging
-        wpilib.DriverStation.startDataLog(wpilib.DataLogManager.getLog())  # Log joystick inputs
+        DataLogManager.start()  # Start logging
+        DriverStation.startDataLog(DataLogManager.getLog())  # Log joystick inputs
         print("WPILib Data Logging Enabled")
 
 
@@ -72,4 +70,4 @@ class MyRobot(commands2.TimedCommandRobot):
 
 
 if __name__ == "__main__":
-    wpilib.run(MyRobot)
+    run(MyRobot)

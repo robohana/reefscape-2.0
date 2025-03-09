@@ -52,4 +52,5 @@ Class Naming (**PascalCase**:) \
 | INTAKE_MOTOR      | 33        |
 | ARM_MOTOR         | 31        |
 | ELEVATOR_MOTOR    | 32        |
+| HANG_MOTOR        | 34        |
 

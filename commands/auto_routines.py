@@ -1,24 +1,24 @@
 
 import time
-#import commands2
 from subsystems.drivetrain import DriveSubsystem
 from commands2 import Command
+from subsystems.drivetrain import DriveSubsystem
 
-class AutoRoutines(Command):
+class SimpleAuto(Command):
     """A simple autonomous routine for testing robot movement in AdvantageScope."""
 
-    def __init__(self, robot_drive: DriveSubsystem):
+    def __init__(self, robotDrive: DriveSubsystem):
         super().__init__()
-        self.robot_drive = robot_drive
+        self.robotDrive = robotDrive
         self.start_time = 0
 
-        # Requires the drive subsystem
-        self.addRequirements(self.robot_drive)
+        #  Requires the drive subsystem
+        self.addRequirements(self.robotDrive)
 
     def initialize(self):
         """Called once when autonomous starts."""
         self.start_time = time.time()
-        print("Simple Autonomous Started")
+        print(" Simple Autonomous Started")
 
     def execute(self):
         """Runs periodically during autonomous mode and logs swerve states."""
@@ -26,27 +26,27 @@ class AutoRoutines(Command):
 
         if elapsed_time < 2.0:
             # Move forward with more speed to verify movement
-            self.robot_drive.drive(1.0, 0.0, 0.0, field_relative=False)
+            self.robotDrive.drive(1.0, 0.0, 0.0, fieldRelative=False, rateLimit=False)
         elif elapsed_time < 4.0:
             # Rotate to see if robot turns in AS
-            self.robot_drive.drive(0.0, 0.0, 1.0, field_relative=False)
+            self.robotDrive.drive(0.0, 0.0, 1.0, fieldRelative=False, rateLimit=False)
         else:
             # Stop after 4 seconds
-            self.robot_drive.drive(0, 0, 0, False, False)
+            self.robotDrive.drive(0, 0, 0, False, False)
 
-        # TODO: Uncomment for debugging
-        # states = self.robotDrive.getModuleStates()
-        # print(f"Auto Running - Time: {elapsed_time:.2f} sec, States: {states}")
+        #  Print swerve module states to see if they are updating
+        states = self.robotDrive.getModuleStates()
+        print(f"Auto Running - Time: {elapsed_time:.2f} sec, States: {states}")
 
-        # TODO: Uncomment to log values to NetworkTables
-        # self.robotDrive.publishSwerveStates()
+        #  Log the values to NetworkTables
+        self.robotDrive.publishSwerveStates()
 
 
-    def is_finished(self):
+    def isFinished(self):
         """End the command after 4 seconds."""
         return time.time() - self.start_time >= 4.0
 
     def end(self, interrupted):
         """Stop the robot when the command ends."""
-        self.robot_drive.drive(0, 0, 0, False, False)
-        print("Simple Autonomous Ended")
+        self.robotDrive.drive(0, 0, 0, False, False)
+        print(" Simple Autonomous Ended")

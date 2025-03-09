@@ -1,14 +1,12 @@
 from math import pi
 import commands2
 
-from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters, SimpleMotorFeedforwardRadians
 from constants import DriveConstants
 
-from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, ClosedLoopSlot, SparkClosedLoopController
+from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, ClosedLoopSlot
 
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
-from ntcore import NetworkTableInstance
 
 
 class MAXSwerveModule(commands2.SubsystemBase):
@@ -79,8 +77,6 @@ class MAXSwerveModule(commands2.SubsystemBase):
             self.drive_encoder.getPosition(),
             Rotation2d(self.turn_encoder.getPosition() - self.chassis_angular_offset)
         )
-    
- 
 
     def set_desired_state(self, desired_state: SwerveModuleState):
         """Sets the desired state of the module, using PID and feedforward for the drive motor."""

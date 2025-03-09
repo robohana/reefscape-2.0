@@ -94,17 +94,17 @@ class RobotContainer:
         self.operator_controller.y().onTrue(self.coral.setSetpointCommand(Setpoint.K_LEVEL_3))
 
         # DRIVER Start Button -> Zero swerve heading
-        self.driver_controller.start().onTrue(self.robot_drive.zero_heading)
+        self.driver_controller.start().onTrue(self.robot_drive.zero_heading())
         
         # DRIVER Y Button -> Lift robot using power only
-        self.driver_controller.y().onTrue(self.hang.lift_command_power)
+        self.driver_controller.y().onTrue(self.hang.lift_command_power())
         # DRIVER X Button -> Lower robot using power only
-        self.driver_controller.x().onTrue(self.hang.lower_command_power)
+        self.driver_controller.x().onTrue(self.hang.lower_command_power())
 
         # DRIVER B Button -> Lift robot using setpoint only
-        self.driver_controller.b().onTrue(self.hang.lift_to_setpoint)
+        self.driver_controller.b().onTrue(self.hang.lift_to_setpoint())
         # DRIVER A Button -> Lower robot using setpoint only
-        self.driver_controller.a().onTrue(self.hang.lower_to_setpoint)
+        self.driver_controller.a().onTrue(self.hang.lower_to_setpoint())
 
 
     def disablePIDSubsystems(self) -> None:

@@ -1,9 +1,9 @@
 import commands2
 from commands2 import Command, StartEndCommand
 
-from constants import CoralSubsystemConstants, Setpoint
+from constants import CoralSubsystemConstants, Setpoint, OIConstants
 
-from wpilib import RobotController
+from wpilib import RobotController, XboxController
 from wpilib import SmartDashboard as sd
 from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, SparkFlex, SparkFlexConfig, MAXMotionConfig, LimitSwitchConfig, SparkLowLevel
 
@@ -32,7 +32,8 @@ class CoralSubsystem(commands2.SubsystemBase):
         elevator_motor_config = SparkFlexConfig()
         elevator_maxmotion_config = MAXMotionConfig()
         intake_motor_config = SparkMaxConfig()
-
+        
+        self.operator_controller = XboxController(OIConstants.K_OPERATOR_CONTROLLER_PORT)
 
 # arm_motor_config
         """Configure the closed loop contoller. We want to make sure we set the feedback sensor as the primary encoder"""
@@ -47,14 +48,13 @@ class CoralSubsystem(commands2.SubsystemBase):
         arm_maxmotion_config.maxAcceleration(10000)
         arm_maxmotion_config.allowedClosedLoopError(0.25)
 
-
 # elevator_motor_config
         """Configure the closed loop controller. We want to make sure we set the feedback sensor as the primary encoder"""
         # Configure basic settings of the elevator motor
         elevator_motor_config.setIdleMode(SparkBaseConfig.IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12)
         elevator_motor_config.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
         # Set PID values for position control
-        elevator_motor_config.closedLoop.pid(CoralSubsystemConstants.Elevator.K_P, CoralSubsystemConstants.Elevator.K_I, CoralSubsystemConstants.Elevator.K_D)
+        elevator_motor_config.closedLoop.pidf(CoralSubsystemConstants.Elevator.K_P, CoralSubsystemConstants.Elevator.K_I, CoralSubsystemConstants.Elevator.K_D, CoralSubsystemConstants.Elevator.K_F)
         elevator_motor_config.closedLoop.outputRange(-1, 1)
         """Configure the reverse limit switch for the elevator. By enabling the limit switch, this will prevent any actuation of the elevator in the reverse direction of the limit switch is pressed."""
         elevator_motor_config.limitSwitch.reverseLimitSwitchEnabled(True)
@@ -63,7 +63,6 @@ class CoralSubsystem(commands2.SubsystemBase):
         elevator_maxmotion_config.maxVelocity(4200)
         elevator_maxmotion_config.maxAcceleration(6000)
         elevator_maxmotion_config.allowedClosedLoopError(0.5)
-        
 
 #intake_motor_config
         # Configure basic settings of the intake motor
@@ -152,4 +151,3 @@ class CoralSubsystem(commands2.SubsystemBase):
         sd.putNumber("Coral/Elevator/Target Position", self.elevator_current_target)
         sd.putNumber("Coral/Elevator/Actual Position", self.elevator_encoder.getPosition())
         sd.putNumber("Coral/Intake/Applied Output", self.intake_motor.getAppliedOutput())
-    

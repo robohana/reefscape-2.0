@@ -110,7 +110,8 @@ class CoralSubsystem(commands2.SubsystemBase):
     def set_intake_power(self, power: float) -> None:
         self.intake_motor.set(power) 
 
-    class setSetpointCommand(Command):   
+    class setSetpointCommand(Command):  
+        """ Command to set the subsystem setpoint. This will set the arm and elevator to their predefined positions for the given setpoint """ 
         def __init__(self, setpoint):
             super().__init__()
             self.setpoint = setpoint
@@ -130,12 +131,14 @@ class CoralSubsystem(commands2.SubsystemBase):
             return True
     
     def run_intake_command(self):
+        """ Command to run the intake motor. When the command is interrupted, e.g. the button is released, the motor will stop """
         return StartEndCommand(
             lambda: self.set_intake_power(Setpoint.Intake.K_FORWARD),
             lambda: self.set_intake_power(0.0)
         ) 
     
     def reverse_intake_command(self):
+        """ Command to reverse the intake motor. When the command is interrupted, e.g. the button is released, the motor will stop """
         return StartEndCommand(
             lambda: self.set_intake_power(Setpoint.Intake.K_REVERSE),
             lambda: self.set_intake_power(0.0)
@@ -146,6 +149,7 @@ class CoralSubsystem(commands2.SubsystemBase):
         self.zero_elevator_on_limit_switch()
         self.zero_on_user_button()
 
+        # Display subsystem values
         sd.putNumber("Coral/Arm/Target Position", self.arm_current_target)
         sd.putNumber("Coral/Arm/Actual Position", self.arm_encoder.getPosition())
         sd.putNumber("Coral/Elevator/Target Position", self.elevator_current_target)

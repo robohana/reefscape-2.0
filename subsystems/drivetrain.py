@@ -112,12 +112,8 @@ class DriveSubsystem(Subsystem):
         sd.putString("Robot Location, y", str(self.get_pose().Y()))
         sd.putString("Robot Location, rotation", str(self.get_pose().rotation().degrees()))    
 
-
-
         # Publish swerve module states and chassis speeds for AdvantageScope
         #self.publishSwerveStates()
-
-
 
     def zero_heading_after_delay(self):
         try:
@@ -126,8 +122,6 @@ class DriveSubsystem(Subsystem):
         except Exception as e:
             print(f"Error resetting gyro: {e}")
 
-    
-    
     
     def get_pose(self) -> Pose2d:
         """Returns the currently-estimated pose of the robot.
@@ -306,10 +300,6 @@ class DriveSubsystem(Subsystem):
     #         DrivingConstants.kinematics.toSwerveModuleStates(chassisSpeeds)
     #     )
 
-
-
-   
-
     def zero_heading(self) -> None:
         """Zeroes the heading of the robot."""
         self.gyro.reset()
@@ -322,15 +312,14 @@ class DriveSubsystem(Subsystem):
         return Rotation2d.fromDegrees(self.gyro.getAngle()).degrees()
         #return Rotation2d.fromDegrees(self.gyro.getAngle() * (-1.0 if DrivingConstants.KGyroReversed else 1.0)).degrees()
 
-
     def get_rotation_2d(self) -> Rotation2d:
         return Rotation2d.fromDegrees(self.get_heading())
     
         #^used when we are able to adjust gyro with apriltags
+
     def set_heading(self, angle):
         self.gyro.reset()
         self.gyro.setAngleAdjustment(angle)
-
 
     def get_turn_rate(self) -> float:
         """Returns the turn rate of the robot.
@@ -339,7 +328,6 @@ class DriveSubsystem(Subsystem):
         """
         return self.gyro.getRate() * (-1.0 if RobotConstants.K_GYRO_REVERSED else 1.0)
     
-
     def stop(self) -> None:
         """Stops the module."""
         self.drive(0, 0, 0, False)

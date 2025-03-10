@@ -3,7 +3,7 @@ from commands2 import Command, StartEndCommand
 
 from constants import CoralSubsystemConstants, Setpoint, OIConstants
 
-from wpilib import RobotController, XboxController
+from wpilib import RobotController, XboxController, DigitalInput
 from wpilib import SmartDashboard as sd
 from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, SparkFlex, SparkFlexConfig, MAXMotionConfig, LimitSwitchConfig, SparkLowLevel
 
@@ -84,6 +84,8 @@ class CoralSubsystem(commands2.SubsystemBase):
 
         self.was_reset_by_limit = False
         self.was_reset_by_button = False
+
+        self.coral_sensor = DigitalInput(0)
         
     def move_to_setpoint(self) -> None:
         """ Drive the arm and elevator motors to their respective setpoints. This will use MAXMotion position control which will allow for a smooth acceleration and deceleration to the mechanisms' setpoints """
@@ -122,6 +124,7 @@ class CoralSubsystem(commands2.SubsystemBase):
                 Setpoint.K_LEVEL_1: (Setpoint.Arm.K_LEVEL_1, Setpoint.Elevator.K_LEVEL_1),
                 Setpoint.K_LEVEL_2: (Setpoint.Arm.K_LEVEL_2, Setpoint.Elevator.K_LEVEL_2),
                 Setpoint.K_LEVEL_3: (Setpoint.Arm.K_LEVEL_3, Setpoint.Elevator.K_LEVEL_3),
+                Setpoint.K_POP: (Setpoint.Arm.K_POP, Setpoint.Elevator.K_POP),
             }    
 
             if self.setpoint in setpoint_map:
@@ -137,12 +140,29 @@ class CoralSubsystem(commands2.SubsystemBase):
             lambda: self.set_intake_power(0.0)
         ) 
     
+    def run_intake_power(self):
+        self.set_intake_power(Setpoint.Intake.K_FORWARD) 
+
+    def stop_intake(self):
+        self.set_intake_power(0.0)      
+
     def reverse_intake_command(self):
         """ Command to reverse the intake motor. When the command is interrupted, e.g. the button is released, the motor will stop """
         return StartEndCommand(
             lambda: self.set_intake_power(Setpoint.Intake.K_REVERSE),
             lambda: self.set_intake_power(0.0)
         ) 
+    
+    def reverse_intake_power(self):
+        self.set_intake_power(Setpoint.Intake.K_REVERSE)
+    
+    def pop_intake(self):
+        # Add code to raise intake mechanism (e.g., solenoid or motor)
+        self.setSetpointCommand(Setpoint.K_POP)
+        print("Intake popped up!")  # Placeholder
+
+    def is_object_detected(self):
+        return not self.coral_sensor.get()  # Adjust based on sensor logic (True when detected)
     
     def periodic(self):
         self.move_to_setpoint()

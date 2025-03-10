@@ -17,6 +17,7 @@ from subsystems.drivetrain import DriveSubsystem
 from constants import AutoConstants, OIConstants, Setpoint
 from commands.SwerveJoystickCmd import SwerveJoystickCmd
 from commands.hang_cmd import HangCmd
+from commands.intake_cmd import RunIntakeCommand, ReleaseIntakeCommand
 from commands.auto_routines import SimpleAuto
 
 
@@ -41,6 +42,9 @@ class RobotContainer:
 
         self.hang_lift_command = HangCmd(self.hang, self.driver_controller, Setpoint.Hang.K_UP_POSITION)
         self.hang_lower_command = HangCmd(self.hang, self.driver_controller, Setpoint.Hang.K_DOWN_POSITION)
+
+        self.run_intake_command = RunIntakeCommand(self.coral)
+        self.release_intake_command = ReleaseIntakeCommand(self.coral)
 
         # Configure default commands
         self.set_default_command()
@@ -88,9 +92,9 @@ class RobotContainer:
         # self.robotDrive.setDefaultCommand(SwerveJoystickCmd(self.robotDrive, self.driverController))
         
         # OPERATOR Left Bumper -> Run Coral Intake
-        self.operator_controller.leftBumper().whileTrue(self.coral.run_intake_command())
+        self.operator_controller.leftBumper().whileTrue(self.run_intake_command)
         # OPERATOR Right Bumper -> Run Coral Intake in Reverse
-        self.operator_controller.rightBumper().whileTrue(self.coral.reverse_intake_command()) 
+        self.operator_controller.rightBumper().whileTrue(self.release_intake_command) 
 
         # OPERATOR B Button -> Elevator/Arm to human player position
         self.operator_controller.b().onTrue(self.coral.setSetpointCommand(Setpoint.K_CORAL_STATION))

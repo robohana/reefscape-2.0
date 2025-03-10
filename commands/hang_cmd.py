@@ -18,10 +18,7 @@ class HangCmd(Command):
     def initialize(self):
         """Move to target position using relative offset-based encoder readings."""
         sd.putString("HangCmd", f"Moving to {self.target_position}")
-        self.hang.hang_closed_loop_controller.setReference(
-            self.target_position + self.hang.zero_offset, 
-            SparkLowLevel.ControlType.kMAXMotionPositionControl
-        )
+        self.hang.move_to_position(0.0)
     
     def execute(self):
         """Update dashboard with encoder position."""

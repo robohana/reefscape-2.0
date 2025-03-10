@@ -11,7 +11,6 @@ class HangSubsystem(commands2.SubsystemBase):
         self.hang_motor = SparkMax(HangSubSystemConstants.K_HANG_MOTOR_CHANNEL, SparkMax.MotorType.kBrushless)
         self.hang_encoder = self.hang_motor.getAbsoluteEncoder()
 
-
         hang_motor_config = SparkMaxConfig()
         hang_maxmotion_config = MAXMotionConfig()
 

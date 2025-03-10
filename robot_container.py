@@ -16,6 +16,7 @@ from subsystems.hang_subsystem import HangSubsystem
 from subsystems.drivetrain import DriveSubsystem
 from constants import AutoConstants, OIConstants, Setpoint
 from commands.SwerveJoystickCmd import SwerveJoystickCmd
+from commands.hang_cmd import HangCmd
 from commands.auto_routines import SimpleAuto
 
 
@@ -38,10 +39,15 @@ class RobotContainer:
         self.driver_controller = CommandXboxController(OIConstants.K_DRIVER_CONTROLLER_PORT)
         self.operator_controller = CommandXboxController(OIConstants.K_OPERATOR_CONTROLLER_PORT)  
 
+        self.hang_lift_command = HangCmd(self.hang, self.driver_controller, Setpoint.Hang.K_UP_POSITION)
+        self.hang_lower_command = HangCmd(self.hang, self.driver_controller, Setpoint.Hang.K_DOWN_POSITION)
+
         # Configure default commands
         self.set_default_command()
         # Configure the button bindings
         self.configure_button_bindings()
+
+        
 
         # self.robotDrive.setDefaultCommand(
         #     SwerveJoystickCmd(self.robotDrive, self.driverController)
@@ -94,17 +100,22 @@ class RobotContainer:
         self.operator_controller.y().onTrue(self.coral.setSetpointCommand(Setpoint.K_LEVEL_3))
 
         # DRIVER Start Button -> Zero swerve heading
-        self.driver_controller.start().onTrue(self.robot_drive.zero_heading())
+        # self.driver_controller.start().onTrue(self.robot_drive.zero_heading())
         
         # DRIVER Y Button -> Lift robot using power only
-        self.driver_controller.y().onTrue(self.hang.lift_command_power())
-        # DRIVER X Button -> Lower robot using power only
-        self.driver_controller.x().onTrue(self.hang.lower_command_power())
+        # self.driver_controller.y().onTrue(self.hang.lift_command_power())
+        # # DRIVER X Button -> Lower robot using power only
+        # self.driver_controller.x().onTrue(self.hang.lower_command_power())
 
-        # DRIVER B Button -> Lift robot using setpoint only
-        self.driver_controller.b().onTrue(self.hang.lift_to_setpoint())
-        # DRIVER A Button -> Lower robot using setpoint only
-        self.driver_controller.a().onTrue(self.hang.lower_to_setpoint())
+        # # DRIVER B Button -> Lift robot using setpoint only
+        # self.driver_controller.b().onTrue(self.hang_lift_command())
+        # # DRIVER A Button -> Lower robot using setpoint only
+        # self.driver_controller.a().onTrue(self.hang_lower_command())
+
+        self.driver_controller.y().onTrue(self.hang_lift_command)  # Press Y to go up
+        self.driver_controller.a().onTrue(self.hang_lower_command)  # Press A to go down     
+
+        # self.driver_controller.rightBumper(self.hang.power_zero())
 
 
     def disablePIDSubsystems(self) -> None:

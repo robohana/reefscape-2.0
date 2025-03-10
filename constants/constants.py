@@ -133,18 +133,21 @@ class Setpoint:
     K_LEVEL_1 = "1"
     K_LEVEL_2 = "2"
     K_LEVEL_3 = "3"
+    K_POP = "Pop"
 
     class Arm:
         K_CORAL_STATION = -12 # 33 for rev
         K_LEVEL_1 = 0
         K_LEVEL_2 = -43 # 2 for rev
         K_LEVEL_3 = -43 # 2 for rev
+        K_POP = -14
 
     class Elevator:
         K_CORAL_STATION = 0 
         K_LEVEL_1 = 0
         K_LEVEL_2 = 6
         K_LEVEL_3 = 69   # 100 for rev 
+        K_POP = 0
 
     class Intake:
         K_FORWARD = 0.62

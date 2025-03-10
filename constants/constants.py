@@ -135,27 +135,24 @@ class Setpoint:
     K_LEVEL_3 = "3"
 
     class Arm:
-        K_CORAL_STATION = -1 # 33 for rev
+        K_CORAL_STATION = -12 # 33 for rev
         K_LEVEL_1 = 0
-        K_LEVEL_2 = -1 # 2 for rev
-        K_LEVEL_3 = -1 # 2 for rev
+        K_LEVEL_2 = -43 # 2 for rev
+        K_LEVEL_3 = -43 # 2 for rev
 
     class Elevator:
         K_CORAL_STATION = 0 
         K_LEVEL_1 = 0
-        K_LEVEL_2 = 0
-        K_LEVEL_3 = 89   # 100 for rev 
+        K_LEVEL_2 = 6
+        K_LEVEL_3 = 69   # 100 for rev 
 
     class Intake:
-        K_FORWARD = 1
-        K_REVERSE = -1 
-        UP_POSITION = 1
-        DOWN_POSITION = -1
+        K_FORWARD = 0.62
+        K_REVERSE = -0.2
 
     class Hang:
-        HANG = 1
-        K_FORWARD = 1
-        K_REVERSE = -1 
+        # K_FORWARD = 0.1
+        # K_REVERSE = -0.1
         K_UP_POSITION = 1
         K_DOWN_POSITION = -1     
 
@@ -178,6 +175,7 @@ class CoralSubsystemConstants:
 
 class HangSubSystemConstants:
     K_HANG_MOTOR_CHANNEL = 34
+    K_ENCODER_CONVERSION_FACTOR = 32.1 # 8192 / 255
 
     K_P = 0.25
     K_I = 0

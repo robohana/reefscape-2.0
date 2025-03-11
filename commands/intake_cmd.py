@@ -1,6 +1,6 @@
 import time
 import wpilib
-from commands2 import Command
+from commands2 import Command, InstantCommand
 from subsystems.coral_subsystem import CoralSubsystem
 
 class RunIntakeCommand(Command):
@@ -10,7 +10,7 @@ class RunIntakeCommand(Command):
         self.timer = wpilib.Timer()
         self.has_detected = False  # Flag to track if we detected an object
 
-        self.addRequirements([CoralSubsystem])  # Ensures command has exclusive control
+        self.addRequirements(self.coral)  # Ensures command has exclusive control
 
     def initialize(self):
         """Called when the command starts."""
@@ -39,7 +39,7 @@ class RunIntakeCommand(Command):
         """Called when the command ends or is interrupted."""
         self.coral.stop_intake()
 
-class ReleaseIntakeCommand(Command):        
+class ReleaseIntakeCommand(InstantCommand):        
     def __init__(self, coral: CoralSubsystem):
-        super().__init__(CoralSubsystem.reverse_intake_power)
-        self.addRequirements([CoralSubsystem])
+        super().__init__(CoralSubsystem.reverse_intake_power, CoralSubsystem)
+        self.addRequirements(coral)

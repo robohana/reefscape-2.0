@@ -10,13 +10,15 @@ robotPeriodic() methods at the bottom of this file should generally remain uncha
 
 from commands2 import CommandScheduler, TimedCommandRobot
 import wpilib
-from wpilib import DataLogManager, DriverStation, run
+from wpilib import DataLogManager, DriverStation, run, SmartDashboard as sd, Spark
+from subsystems.hang_subsystem import HangSubsystem
 from robot_container import RobotContainer
 
 class MyRobot(TimedCommandRobot):
     def robotInit(self) -> None:
         # Instantiate our RobotContainer.  
         self.container = RobotContainer()
+        # self.hang = HangSubsystem()
         #self.autonomousCommand = None
 
         #self.driver_controller = self.container.driver_controller
@@ -29,6 +31,9 @@ class MyRobot(TimedCommandRobot):
 
         # robotDrive = self.robotDrive
 
+        self.blinkin = Spark(7)
+        self.blinkin.setSafetyEnabled(False)
+        self.setBlinkinPattern(0.65)
 
         DataLogManager.start()  # Start logging
         DriverStation.startDataLog(DataLogManager.getLog())  # Log joystick inputs
@@ -37,6 +42,8 @@ class MyRobot(TimedCommandRobot):
 
     def robotPeriodic(self) -> None:
         CommandScheduler.getInstance().run()
+        # position = self.hang.get_current_position()
+        # sd.putNumber("Hang Position", position)
 
     def disabledInit(self) -> None:
         pass
@@ -67,6 +74,10 @@ class MyRobot(TimedCommandRobot):
 
     def testPeriodic(self) -> None:
         pass
+
+    def setBlinkinPattern(self, value):
+        """Set the Blinkin LED pattern using PWM values."""
+        self.blinkin.set(value)
 
 
 if __name__ == "__main__":

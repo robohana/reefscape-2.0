@@ -171,10 +171,10 @@ class CoralSubsystemConstants:
         K_D = 0
 
     class Elevator:
-        K_P = 0.5
+        K_P = 0.9
         K_I = 0
         K_D = 0
-        K_F = 0.25
+        K_F = 0.5
 
 class HangSubSystemConstants:
     K_HANG_MOTOR_CHANNEL = 34

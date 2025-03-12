@@ -88,11 +88,14 @@ class CoralSubsystem(commands2.SubsystemBase):
         self.coral_sensor = DigitalInput(8)
         
     def move_to_arm_setpoint(self, arm_setpoint: float):
-        """ Drive the arm and elevator motors to their respective setpoints. This will use MAXMotion position control which will allow for a smooth acceleration and deceleration to the mechanisms' setpoints """
-        self.arm_setpoint = self.arm_closed_loop_controller.setReference(arm_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)    
+        ''' Drive the arm motor to the setpoint. '''
+        self.arm_current_target = arm_setpoint
+        self.arm_closed_loop_controller.setReference(arm_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)
+ 
 
     def move_to_elevator_setpoint(self, elevator_setpoint: float):
-        """ Drive the arm and elevator motors to their respective setpoints. This will use MAXMotion position control which will allow for a smooth acceleration and deceleration to the mechanisms' setpoints """
+        """ Drive the arm and elevator motors to their respective setpoints. """
+        self.elevator_current_target = elevator_setpoint
         self.elevator_setpoint = self.elevator_closed_loop_controller.setReference(elevator_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)
 
     def zero_elevator_on_limit_switch(self) -> None:

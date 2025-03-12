@@ -17,8 +17,9 @@ from subsystems.drivetrain import DriveSubsystem
 from constants import AutoConstants, OIConstants, Setpoint
 from commands.SwerveJoystickCmd import SwerveJoystickCmd
 from commands.hang_cmd import HangCmd
-from commands.intake_cmd import RunIntakeCommand, ReleaseIntakeCommand
+from commands.intake_cmd import RunIntakeCommand, ReleaseIntakeCommand, MoveToSetpointCommand
 from commands.auto_routines import SimpleAuto
+from commands.coral_cmds import ScoreCoralL1, ScoreCoralL2, ScoreCoralL3, IntakeCoralStation
 
 
 class RobotContainer:
@@ -40,14 +41,17 @@ class RobotContainer:
         self.driver_controller = CommandXboxController(OIConstants.K_DRIVER_CONTROLLER_PORT)
         self.operator_controller = CommandXboxController(OIConstants.K_OPERATOR_CONTROLLER_PORT)  
 
+        # Commands
         self.hang_lift_command = HangCmd(self.hang, self.driver_controller, Setpoint.Hang.K_UP_POSITION)
         self.hang_lower_command = HangCmd(self.hang, self.driver_controller, Setpoint.Hang.K_DOWN_POSITION)
 
-        self.run_intake_command = RunIntakeCommand(self.coral)
-        self.release_intake_command = ReleaseIntakeCommand(self.coral)
+        # self.run_intake_command = RunIntakeCommand(self.coral)
+        # self.release_intake_command = ReleaseIntakeCommand(self.coral)
 
+        
         # Configure default commands
         self.set_default_command()
+
         # Configure the button bindings
         self.configure_button_bindings()
 
@@ -92,16 +96,18 @@ class RobotContainer:
         # self.robotDrive.setDefaultCommand(SwerveJoystickCmd(self.robotDrive, self.driverController))
         
         # OPERATOR Left Bumper -> Run Coral Intake
-        self.operator_controller.leftBumper().whileTrue(self.run_intake_command)
-        # OPERATOR Right Bumper -> Run Coral Intake in Reverse
-        self.operator_controller.rightBumper().whileTrue(self.release_intake_command) 
+        # self.operator_controller.leftBumper().whileTrue(self.run_intake_command)
+        # # OPERATOR Right Bumper -> Run Coral Intake in Reverse
+        # self.operator_controller.rightBumper().whileTrue(self.release_intake_command) 
 
         # OPERATOR B Button -> Elevator/Arm to human player position
-        self.operator_controller.b().onTrue(self.coral.setSetpointCommand(Setpoint.K_CORAL_STATION))
+        self.operator_controller.a().onTrue(IntakeCoralStation(self.coral))
         # OPERATOR X Button -> Elevator/Arm to level 2 position
-        self.operator_controller.a().onTrue(self.coral.setSetpointCommand(Setpoint.K_LEVEL_2))
+        self.operator_controller.x().onTrue(ScoreCoralL2(self.coral))
+        # OPERATOR X Button -> Elevator/Arm to level 2 position
+        self.operator_controller.y().onTrue(ScoreCoralL2(self.coral))
         # OPERATOR Y Button -> Elevator/Arm to level 3 position
-        self.operator_controller.y().onTrue(self.coral.setSetpointCommand(Setpoint.K_LEVEL_3))
+        self.operator_controller.b().onTrue(ScoreCoralL3(self.coral))
 
         # DRIVER Start Button -> Zero swerve heading
         # self.driver_controller.start().onTrue(self.robot_drive.zero_heading())

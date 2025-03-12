@@ -16,7 +16,7 @@ class CoralSubsystem(commands2.SubsystemBase):
         # elevator_motor: Raises and lowers the elevator, Spark Flex, Brushless, Closed Loop Controller, Absolute Encoder
         # intake_motor:   Controllers the intake rollers, Spark Max,  Brushless, None,                   None
         self.arm_motor = SparkMax(CoralSubsystemConstants.K_ARM_MOTOR_CHANNEL, SparkMax.MotorType.kBrushless)
-        self.elevator_motor = SparkMax(CoralSubsystemConstants.K_ELEVATOR_MOTOR_CHANNEL, SparkFlex.MotorType.kBrushless)
+        self.elevator_motor = SparkFlex(CoralSubsystemConstants.K_ELEVATOR_MOTOR_CHANNEL, SparkFlex.MotorType.kBrushless)
         self.intake_motor = SparkMax(CoralSubsystemConstants.K_INTAKE_MOTOR_CHANNEL, SparkMax.MotorType.kBrushless)
 
         # Setup encoders for the motors. Only need arm and elevator. The elevator will be pulling the through bore absolute encoder in. RN just set to how rev has it
@@ -85,12 +85,15 @@ class CoralSubsystem(commands2.SubsystemBase):
         self.was_reset_by_limit = False
         self.was_reset_by_button = False
 
-        self.coral_sensor = DigitalInput(0)
+        self.coral_sensor = DigitalInput(8)
         
-    def move_to_setpoint(self) -> None:
+    def move_to_arm_setpoint(self, arm_setpoint: float):
         """ Drive the arm and elevator motors to their respective setpoints. This will use MAXMotion position control which will allow for a smooth acceleration and deceleration to the mechanisms' setpoints """
-        self.arm_closed_loop_controller.setReference(self.arm_current_target, SparkLowLevel.ControlType.kMAXMotionPositionControl)  
-        self.elevator_closed_loop_controller.setReference(self.elevator_current_target, SparkLowLevel.ControlType.kMAXMotionPositionControl)  
+        self.arm_setpoint = self.arm_closed_loop_controller.setReference(arm_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)    
+
+    def move_to_elevator_setpoint(self, elevator_setpoint: float):
+        """ Drive the arm and elevator motors to their respective setpoints. This will use MAXMotion position control which will allow for a smooth acceleration and deceleration to the mechanisms' setpoints """
+        self.elevator_setpoint = self.elevator_closed_loop_controller.setReference(elevator_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)
 
     def zero_elevator_on_limit_switch(self) -> None:
         """ Zero the encoder when the limit switch is pressed """
@@ -112,26 +115,33 @@ class CoralSubsystem(commands2.SubsystemBase):
     def set_intake_power(self, power: float) -> None:
         self.intake_motor.set(power) 
 
-    class setSetpointCommand(Command):  
-        """ Command to set the subsystem setpoint. This will set the arm and elevator to their predefined positions for the given setpoint """ 
-        def __init__(self, setpoint):
-            super().__init__()
-            self.setpoint = setpoint
+    # class setSetpointCommand(Command):  
+    #     """ Command to set the subsystem setpoint. This will set the arm and elevator to their predefined positions for the given setpoint """ 
+    #     def __init__(self, setpoint):
+    #         super().__init__()
+    #         self.setpoint = setpoint
 
-        def initialize(self):
-            setpoint_map = {
-                Setpoint.K_CORAL_STATION: (Setpoint.Arm.K_CORAL_STATION, Setpoint.Elevator.K_CORAL_STATION),
-                Setpoint.K_LEVEL_1: (Setpoint.Arm.K_LEVEL_1, Setpoint.Elevator.K_LEVEL_1),
-                Setpoint.K_LEVEL_2: (Setpoint.Arm.K_LEVEL_2, Setpoint.Elevator.K_LEVEL_2),
-                Setpoint.K_LEVEL_3: (Setpoint.Arm.K_LEVEL_3, Setpoint.Elevator.K_LEVEL_3),
-                Setpoint.K_POP: (Setpoint.Arm.K_POP, Setpoint.Elevator.K_POP),
-            }    
+    #     def initialize(self):
+    #         print(f"Initializing setSetpointCommand with setpoint: {self.setpoint}")
+    #         setpoint_map = {
+    #             Setpoint.K_CORAL_STATION: (Setpoint.Arm.K_CORAL_STATION, Setpoint.Elevator.K_CORAL_STATION),
+    #             Setpoint.K_LEVEL_1: (Setpoint.Arm.K_LEVEL_1, Setpoint.Elevator.K_LEVEL_1),
+    #             Setpoint.K_LEVEL_2: (Setpoint.Arm.K_LEVEL_2, Setpoint.Elevator.K_LEVEL_2),
+    #             Setpoint.K_LEVEL_3: (Setpoint.Arm.K_LEVEL_3, Setpoint.Elevator.K_LEVEL_3),
+    #             Setpoint.K_POP: (Setpoint.Arm.K_POP, Setpoint.Elevator.K_POP),
+    #         }    
 
-            if self.setpoint in setpoint_map:
-                self.arm_current_target, self.elevator_current_target = setpoint_map[self.setpoint]
+    #         if self.setpoint in setpoint_map:
+    #             self.arm_current_target, self.elevator_current_target = setpoint_map[self.setpoint]
+    #             print(f"Set arm target to {self.arm_current_target}, elevator target to {self.elevator_current_target}")
+    #         else:
+    #             print(f"ERROR: Setpoint {self.setpoint} not found in setpoint_map")
 
-        def isFinished(self):
-            return True
+    #     def isFinished(self):
+    #         self.arm_current_position = 
+    #         self.arm_error = abs(self.arm_current_target - )
+    #         print("done")
+    #         return True
     
     def run_intake_command(self):
         """ Command to run the intake motor. When the command is interrupted, e.g. the button is released, the motor will stop """
@@ -158,14 +168,19 @@ class CoralSubsystem(commands2.SubsystemBase):
     
     def pop_intake(self):
         # Add code to raise intake mechanism (e.g., solenoid or motor)
-        self.setSetpointCommand(Setpoint.K_POP)
+        self.move_to_setpoint(Setpoint.Arm.K_POP, Setpoint.Elevator.K_POP)
         print("Intake popped up!")  # Placeholder
 
     def is_object_detected(self):
         return not self.coral_sensor.get()  # Adjust based on sensor logic (True when detected)
     
+    def get_arm_position(self):
+        return self.arm_encoder.getPosition
+
+    def get_elevator_position(self):
+        return self.elevator_encoder.getPosition    
+    
     def periodic(self):
-        self.move_to_setpoint()
         self.zero_elevator_on_limit_switch()
         self.zero_on_user_button()
 

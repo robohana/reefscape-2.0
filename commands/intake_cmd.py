@@ -1,202 +1,117 @@
-import commands2
-from commands2 import Command, StartEndCommand
+import time
+import wpilib
+from commands2 import Command, InstantCommand
+from subsystems.coral_subsystem import CoralSubsystem
+from rev import SparkLowLevel
 
-from constants.constants import CoralSubsystemConstants, Setpoint, OIConstants
-
-from wpilib import RobotController, XboxController, DigitalInput
-from wpilib import SmartDashboard as sd
-from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, SparkFlex, SparkFlexConfig, MAXMotionConfig, LimitSwitchConfig, SparkLowLevel
-
-
-class CoralSubsystem(commands2.SubsystemBase):
-    def __init__(self) -> None:
+class RunIntakeCommand(Command):
+    def __init__(self, coral: CoralSubsystem):
         super().__init__()
+        self.coral = coral
+        self.timer = wpilib.Timer()
+        self.has_detected = False  # Flag to track if we detected an object
 
-        # arm_motor:      Angles the intake,              Spark Max,  Brushless, Closed Loop Controller, Relative Encoder
-        # elevator_motor: Raises and lowers the elevator, Spark Flex, Brushless, Closed Loop Controller, Absolute Encoder
-        # intake_motor:   Controllers the intake rollers, Spark Max,  Brushless, None,                   None
-        self.arm_motor = SparkMax(CoralSubsystemConstants.K_ARM_MOTOR_CHANNEL, SparkMax.MotorType.kBrushless)
-        self.elevator_motor = SparkFlex(CoralSubsystemConstants.K_ELEVATOR_MOTOR_CHANNEL, SparkFlex.MotorType.kBrushless)
-        self.intake_motor = SparkMax(CoralSubsystemConstants.K_INTAKE_MOTOR_CHANNEL, SparkMax.MotorType.kBrushless)
+        self.addRequirements(self.coral)  # Ensures command has exclusive control
 
-        # Setup encoders for the motors. Only need arm and elevator. The elevator will be pulling the through bore absolute encoder in. RN just set to how rev has it
-        self.arm_encoder = self.arm_motor.getEncoder()
-        self.elevator_encoder = self.elevator_motor.getEncoder()
+    def initialize(self):
+        """Called when the command starts."""
+        self.timer.reset()
+        self.timer.stop()
+        self.has_detected = False
+        self.coral.run_intake_power()  # Start the intake
 
-        # the intake won't have a closed loop or any controller
-        self.arm_closed_loop_controller = self.arm_motor.getClosedLoopController()
-        self.elevator_closed_loop_controller = self.elevator_motor.getClosedLoopController()
+    def execute(self):
+        """Called repeatedly while the command is running."""
+        if self.coral.is_object_detected():  # Sensor detected object
+            if not self.has_detected:
+                self.has_detected = True
+                self.timer.reset()
+                self.timer.start()
 
-        arm_motor_config = SparkMaxConfig()
-        arm_maxmotion_config = MAXMotionConfig()
-        elevator_motor_config = SparkFlexConfig()
-        elevator_maxmotion_config = MAXMotionConfig()
-        intake_motor_config = SparkMaxConfig()
+        # If we have detected an object and 1 second has passed, stop intake and pop it up
+        if self.has_detected and self.timer.hasElapsed(1.0):
+            self.coral.pop_intake()
+
+    def isFinished(self):
+        """End the command after popping intake."""
+        return self.has_detected and self.timer.hasElapsed(1.2)  # Add slight buffer
+
+    def end(self, interrupted):
+        """Called when the command ends or is interrupted."""
+        self.coral.stop_intake()
+
+class ReleaseIntakeCommand(InstantCommand):        
+    def __init__(self, coral: CoralSubsystem):
+        super().__init__()
+        self.coral = coral
+        self.addRequirements(self.coral)
+
+    def initialize(self):
+        pass
+
+    def execute(self):
+        self.coral.reverse_intake_power()
+
+    def end(self, interrupted):
+        self.coral.stop_intake()    
+
+class MoveToSetpointCommand(Command):
+    def __init__(self, coral_subsystem: CoralSubsystem, arm_setpoint: float, elevator_setpoint: float) -> None:
+        super().__init__()
+        self.coral = coral_subsystem
+        self.arm_setpoint = arm_setpoint
+        self.elevator_setpoint = elevator_setpoint
+
+        # arm_current_position: float
+        # elevator_current_position: float
+
+    def initialize(self):
+        # Optionally, print initial values or do setup
+        print("Initializing arm move to setpoint")
+        # self.arm_current_position = self.coral.get_arm_position()
+        # self.elevator_current_position = self.coral.get_elevator_position()    
+
+    def execute(self):
+        # Set motor to move towards target setpoint
+        # Example logic: Set motor output based on PID, or some other method.
+
+        self.coral.move_to_arm_setpoint(self.arm_setpoint)   
+        self.coral.move_to_elevator_setpoint(self.elevator_setpoint) 
+
+        # self.coral.arm_closed_loop_controller.setReference(self.arm_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)
+        # self.coral.elevator_closed_loop_controller.setReference(self.elevator_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)
+
+        # if self.arm_current_position is None:
+        #     self.arm_current_position = 1
+        # else:
+        #     self.arm_current_position = self.arm_current_position
+
+        # if self.elevator_current_position is None:
+        #     self.elevator_current_position = 1
+        # else: 
+        #     self.elevator_current_position = self.elevator_current_position
         
-        self.operator_controller = XboxController(OIConstants.K_OPERATOR_CONTROLLER_PORT)
-
-# arm_motor_config
-        """Configure the closed loop contoller. We want to make sure we set the feedback sensor as the primary encoder"""
-        # Configure basic settings of the arm motor
-        arm_motor_config.setIdleMode(SparkBaseConfig.IdleMode.kCoast).smartCurrentLimit(40).voltageCompensation(12)
-        arm_motor_config.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
-        # Set PID values for position control
-        arm_motor_config.closedLoop.pid(CoralSubsystemConstants.Arm.K_P, CoralSubsystemConstants.Arm.K_I, CoralSubsystemConstants.Arm.K_D)
-        arm_motor_config.closedLoop.outputRange(-1,1)
-        # Set MAXMotion paraneters for position control
-        arm_maxmotion_config.maxVelocity(2000)
-        arm_maxmotion_config.maxAcceleration(10000)
-        arm_maxmotion_config.allowedClosedLoopError(0.25)
-
-# elevator_motor_config
-        """Configure the closed loop controller. We want to make sure we set the feedback sensor as the primary encoder"""
-        # Configure basic settings of the elevator motor
-        elevator_motor_config.setIdleMode(SparkBaseConfig.IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12)
-        elevator_motor_config.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
-        # Set PID values for position control
-        elevator_motor_config.closedLoop.pidf(CoralSubsystemConstants.Elevator.K_P, CoralSubsystemConstants.Elevator.K_I, CoralSubsystemConstants.Elevator.K_D, CoralSubsystemConstants.Elevator.K_F)
-        elevator_motor_config.closedLoop.outputRange(-1, 1)
-        """Configure the reverse limit switch for the elevator. By enabling the limit switch, this will prevent any actuation of the elevator in the reverse direction of the limit switch is pressed."""
-        elevator_motor_config.limitSwitch.reverseLimitSwitchEnabled(True)
-        elevator_motor_config.limitSwitch.reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
-        # set the MAXMotion for position control
-        elevator_maxmotion_config.maxVelocity(4200)
-        elevator_maxmotion_config.maxAcceleration(6000)
-        elevator_maxmotion_config.allowedClosedLoopError(0.5)
-
-#intake_motor_config
-        # Configure basic settings of the intake motor
-        intake_motor_config.inverted(True).setIdleMode(SparkBaseConfig.IdleMode.kBrake).smartCurrentLimit(40)
+        # arm_current_position = self.arm_current_position
         
-# configure motors
-        # arm_motor_config.apply(arm_maxmotion_config)
-        self.arm_motor.configure(arm_motor_config, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
-        # elevator_motor_config.apply(elevator_maxmotion_config)
-        self.elevator_motor.configure(elevator_motor_config, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters) 
-        self.intake_motor.configure(elevator_motor_config, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters) 
+        # elevator_current_position = self.elevator_current_position
+        # self.arm_error = abs(self.arm_setpoint - arm_current_position)
+        # self.elevator_error = abs(self.elevator_setpoint - elevator_current_position)
+        # print(f"Arm Error: {self.arm_error}, Current Position: {self.arm_current_position}")
+        # print(f"Elevator Error: {self.elevator_error}, Current Position: {self.elevator_current_position}")
 
-        # reset encoders to 0
-        self.arm_encoder.setPosition(0)
-        self.elevator_encoder.setPosition(0)    
+    def isFinished(self) -> bool:
+        # Check if the error is small enough to stop
+        # arm_tolerance = 2.0  # You may want to adjust this value
+        # elevator_tolerance = 2.0
+        # if self.arm_error < arm_tolerance and self.elevator_error < elevator_tolerance:
+        #     print("Setpoints reached or within tolerances.")
+        #     return True
+        # return False
+        pass
 
-        self.arm_current_target = Setpoint.Arm.K_CORAL_STATION
-        self.elevator_current_target = Setpoint.Elevator.K_CORAL_STATION
-
-        self.was_reset_by_limit = False
-        self.was_reset_by_button = False
-
-        self.coral_sensor = DigitalInput(8)
-
-    def move_to_setpoint(self, arm_setpoint: float, elevator_setpoint: float):
-        self.move_to_arm_setpoint(arm_setpoint)
-        self.move_to_elevator_setpoint(elevator_setpoint)
-
-        
-    def move_to_arm_setpoint(self, arm_setpoint: float):
-        ''' Drive the arm motor to the setpoint. '''
-        print("in move to arm setpoint")
-        self.arm_current_target = arm_setpoint
-        self.arm_closed_loop_controller.setReference(arm_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)
- 
-    def move_to_elevator_setpoint(self, elevator_setpoint: float):
-        """ Drive the arm and elevator motors to their respective setpoints. """
-        print("in move to elevator setpoint")
-        self.elevator_current_target = elevator_setpoint
-        self.elevator_setpoint = self.elevator_closed_loop_controller.setReference(elevator_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)
-
-    def zero_elevator_on_limit_switch(self) -> None:
-        """ Zero the encoder when the limit switch is pressed """
-        if not self.was_reset_by_limit and self.elevator_motor.getReverseLimitSwitch().get():
-            self.elevator_encoder.setPosition(0)
-            self.was_reset_by_limit = True
+    def end(self, interrupted: bool):
+        # Any cleanup if necessary
+        if interrupted:
+            print("Move command interrupted.")
         else:
-            self.was_reset_by_limit = False
-
-    def zero_on_user_button(self) -> None:
-        """ Zero the arm and elevator encoders when the user button is preesed on the roboRIO """    
-        if not self.was_reset_by_button and RobotController.getUserButton():
-            self.was_reset_by_button = True
-            self.arm_encoder.setPosition(0)
-            self.elevator_encoder.setPosition(0)   
-        else:
-            self.was_reset_by_button = False
-
-    def set_intake_power(self, power: float) -> None:
-        self.intake_motor.set(power) 
-
-    # class setSetpointCommand(Command):  
-    #     """ Command to set the subsystem setpoint. This will set the arm and elevator to their predefined positions for the given setpoint """ 
-    #     def __init__(self, setpoint):
-    #         super().__init__()
-    #         self.setpoint = setpoint
-
-    #     def initialize(self):
-    #         print(f"Initializing setSetpointCommand with setpoint: {self.setpoint}")
-    #         setpoint_map = {
-    #             Setpoint.K_CORAL_STATION: (Setpoint.Arm.K_CORAL_STATION, Setpoint.Elevator.K_CORAL_STATION),
-    #             Setpoint.K_LEVEL_1: (Setpoint.Arm.K_LEVEL_1, Setpoint.Elevator.K_LEVEL_1),
-    #             Setpoint.K_LEVEL_2: (Setpoint.Arm.K_LEVEL_2, Setpoint.Elevator.K_LEVEL_2),
-    #             Setpoint.K_LEVEL_3: (Setpoint.Arm.K_LEVEL_3, Setpoint.Elevator.K_LEVEL_3),
-    #             Setpoint.K_POP: (Setpoint.Arm.K_POP, Setpoint.Elevator.K_POP),
-    #         }    
-
-    #         if self.setpoint in setpoint_map:
-    #             self.arm_current_target, self.elevator_current_target = setpoint_map[self.setpoint]
-    #             print(f"Set arm target to {self.arm_current_target}, elevator target to {self.elevator_current_target}")
-    #         else:
-    #             print(f"ERROR: Setpoint {self.setpoint} not found in setpoint_map")
-
-    #     def isFinished(self):
-    #         self.arm_current_position = 
-    #         self.arm_error = abs(self.arm_current_target - )
-    #         print("done")
-    #         return True
-    
-    def run_intake_command(self):
-        """ Command to run the intake motor. When the command is interrupted, e.g. the button is released, the motor will stop """
-        return StartEndCommand(
-            lambda: self.set_intake_power(Setpoint.Intake.K_FORWARD),
-            lambda: self.set_intake_power(0.0)
-        ) 
-    
-    def run_intake_power(self):
-        self.set_intake_power(Setpoint.Intake.K_FORWARD) 
-
-    def stop_intake(self):
-        self.set_intake_power(0.0)      
-
-    def reverse_intake_command(self):
-        """ Command to reverse the intake motor. When the command is interrupted, e.g. the button is released, the motor will stop """
-        return StartEndCommand(
-            lambda: self.set_intake_power(Setpoint.Intake.K_REVERSE),
-            lambda: self.set_intake_power(0.0)
-        ) 
-    
-    def reverse_intake_power(self):
-        self.set_intake_power(Setpoint.Intake.K_REVERSE)
-    
-    def pop_intake(self):
-        # Add code to raise intake mechanism (e.g., solenoid or motor)
-        self.move_to_arm_setpoint(Setpoint.Arm.K_POP)
-        self.move_to_elevator_setpoint(Setpoint.Elevator.K_POP)
-        print("Intake popped up!")  # Placeholder
-
-    def is_object_detected(self):
-        return not self.coral_sensor.get()  # Adjust based on sensor logic (True when detected)
-    
-    def get_arm_position(self):
-        return self.arm_encoder.getPosition
-
-    def get_elevator_position(self):
-        return self.elevator_encoder.getPosition    
-    
-    def periodic(self):
-        self.zero_elevator_on_limit_switch()
-        self.zero_on_user_button()
-
-        # Display subsystem values
-        sd.putNumber("Coral/Arm/Target Position", self.arm_current_target)
-        sd.putNumber("Coral/Arm/Actual Position", self.arm_encoder.getPosition())
-        sd.putNumber("Coral/Elevator/Target Position", self.elevator_current_target)
-        sd.putNumber("Coral/Elevator/Actual Position", self.elevator_encoder.getPosition())
-        sd.putNumber("Coral/Intake/Applied Output", self.intake_motor.getAppliedOutput())
+            print("Move command completed successfully.")

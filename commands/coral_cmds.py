@@ -1,17 +1,15 @@
 from commands2 import SequentialCommandGroup, InstantCommand, WaitCommand, WaitUntilCommand
 from subsystems.coral_subsystem import CoralSubsystem
 from constants import Setpoint
-from commands.intake_cmd import ReleaseIntakeCommand, RunIntakeCommand
-
+from commands.intake_cmd import ReleaseIntakeCommand, RunIntakeCommand, MoveToSetpointCommand
 
 class ScoreCoralL1(SequentialCommandGroup):
     def __init__(self, coral: CoralSubsystem):
         super().__init__()
         self.addCommands(
             #Step 1: Move Elevator to L1 setpoint
-            InstantCommand(lambda: coral.move_to_elevator_setpoint(Setpoint.Elevator.K_LEVEL_1), coral),
             #Step 2: Move Arm to L1 Setpoint
-            InstantCommand(lambda: coral.move_to_arm_setpoint(Setpoint.Arm.K_LEVEL_1),coral),
+            MoveToSetpointCommand(coral, Setpoint.Arm.K_LEVEL_1, Setpoint.Elevator.K_LEVEL_1),
             #Step 3: Release Intake Command. with wait
             ReleaseIntakeCommand(coral),
         )
@@ -21,9 +19,8 @@ class ScoreCoralL2(SequentialCommandGroup):
         super().__init__()
         self.addCommands(
             #Step 1: Move Elevator to L2 setpoint
-            InstantCommand(lambda: coral.move_to_elevator_setpoint(Setpoint.Elevator.K_LEVEL_2), coral),
             #Step 2: Move Arm to L2 Setpoint
-            InstantCommand(lambda: coral.move_to_arm_setpoint(Setpoint.Arm.K_LEVEL_2),coral),
+            MoveToSetpointCommand(coral, Setpoint.Arm.K_LEVEL_2, Setpoint.Elevator.K_LEVEL_2),
             #Step 3: Release Intake Command. with wait
             ReleaseIntakeCommand(coral),
         )
@@ -33,9 +30,8 @@ class ScoreCoralL3(SequentialCommandGroup):
         super().__init__()
         self.addCommands(
             #Step 1: Move Elevator to L3 setpoint
-            InstantCommand(lambda: coral.move_to_elevator_setpoint(Setpoint.Elevator.K_LEVEL_3), coral),
             #Step 2: Move Arm to L3 Setpoint
-            InstantCommand(lambda: coral.move_to_arm_setpoint(Setpoint.Arm.K_LEVEL_3),coral),
+            MoveToSetpointCommand(coral, Setpoint.Arm.K_LEVEL_3, Setpoint.Elevator.K_LEVEL_3),
             #Step 3: Release Intake Command. with wait
             ReleaseIntakeCommand(coral),
         )   
@@ -45,9 +41,8 @@ class IntakeCoralStation(SequentialCommandGroup):
         super().__init__()
         self.addCommands(
             #Step 1: Move Elevator to Coral Station setpoint
-            InstantCommand(lambda: coral.move_to_elevator_setpoint(Setpoint.Elevator.K_CORAL_STATION), coral),
             #Step 2: Move Arm to Coral Station Setpoint
-            InstantCommand(lambda: coral.move_to_arm_setpoint(Setpoint.Arm.K_CORAL_STATION),coral),
+            MoveToSetpointCommand(coral, Setpoint.Arm.K_CORAL_STATION, Setpoint.Elevator.K_CORAL_STATION),
             #Step 3: Run Intake Command. with wait
             RunIntakeCommand(coral),
         )             

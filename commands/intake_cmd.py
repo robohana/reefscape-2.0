@@ -55,19 +55,21 @@ class ReleaseIntakeCommand(InstantCommand):
         self.coral.stop_intake()    
 
 class MoveToSetpointCommand(Command):
-    def __init__(self, coral_subsystem: CoralSubsystem, arm_setpoint: float, elevator_setpoint: float) -> None:
+    def __init__(self, coral_subsystem: CoralSubsystem, arm_setpoint: float, elevator_setpoint: float, timeout: float = 5.0) -> None:
         super().__init__()
         self.coral = coral_subsystem
         self.arm_setpoint = arm_setpoint
         self.elevator_setpoint = elevator_setpoint
+        self.timeout = timeout
+        self.start_time = None
 
     def initialize(self):
         print("Initializing move to setpoint")
+        self.start_time = wpilib.Timer.getFPGATimestamp()
 
     def execute(self):
-        # Update the setpoint on every cycle:
+        # Update setpoint on every cycle
         self.coral.move_to_setpoint(self.arm_setpoint, self.elevator_setpoint)
-        # Read current positions:
         current_arm = self.coral.get_arm_position()
         current_elevator = self.coral.get_elevator_position()
         self.arm_error = abs(self.arm_setpoint - current_arm)
@@ -76,6 +78,11 @@ class MoveToSetpointCommand(Command):
         print(f"Elevator Error: {self.elevator_error}, Current Position: {current_elevator}")
 
     def isFinished(self) -> bool:
+        # Check if within tolerances or if timeout is reached.
+        current_time = wpilib.Timer.getFPGATimestamp()
+        if current_time - self.start_time >= self.timeout:
+            print("Timeout reached in MoveToSetpointCommand.")
+            return True
         arm_tolerance = 2.0
         elevator_tolerance = 2.0
         if self.arm_error < arm_tolerance and self.elevator_error < elevator_tolerance:
@@ -88,3 +95,4 @@ class MoveToSetpointCommand(Command):
             print("Move command interrupted.")
         else:
             print("Move command completed successfully.")
+

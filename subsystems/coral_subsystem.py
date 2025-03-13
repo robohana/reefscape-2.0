@@ -171,7 +171,8 @@ class CoralSubsystem(commands2.SubsystemBase):
     
     def pop_intake(self):
         # Add code to raise intake mechanism (e.g., solenoid or motor)
-        self.move_to_setpoint(Setpoint.Arm.K_POP, Setpoint.Elevator.K_POP)
+        self.move_to_arm_setpoint(Setpoint.Arm.K_POP)
+        self.move_to_elevator_setpoint(Setpoint.Elevator.K_POP)
         print("Intake popped up!")  # Placeholder
 
     def is_object_detected(self):

@@ -1,8 +1,7 @@
-
 import commands2
 from commands2 import Command, StartEndCommand
 
-from constants import CoralSubsystemConstants, Setpoint, OIConstants
+from constants.constants import CoralSubsystemConstants, Setpoint, OIConstants
 
 from wpilib import RobotController, XboxController, DigitalInput
 from wpilib import SmartDashboard as sd
@@ -87,6 +86,11 @@ class CoralSubsystem(commands2.SubsystemBase):
         self.was_reset_by_button = False
 
         self.coral_sensor = DigitalInput(8)
+
+    def move_to_setpoint(self, arm_setpoint: float, elevator_setpoint: float):
+        self.move_to_arm_setpoint(arm_setpoint)
+        self.move_to_elevator_setpoint(elevator_setpoint)
+
         
     def move_to_arm_setpoint(self, arm_setpoint: float):
         ''' Drive the arm motor to the setpoint. '''

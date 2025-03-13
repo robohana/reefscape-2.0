@@ -2,6 +2,7 @@ import time
 import wpilib
 from commands2 import Command, InstantCommand
 from subsystems.coral_subsystem import CoralSubsystem
+from rev import SparkLowLevel
 
 class RunIntakeCommand(Command):
     def __init__(self, coral: CoralSubsystem):
@@ -61,19 +62,24 @@ class MoveToSetpointCommand(Command):
         self.arm_setpoint = arm_setpoint
         self.elevator_setpoint = elevator_setpoint
 
-        arm_current_position: float
-        elevator_current_position: float
+        # arm_current_position: float
+        # elevator_current_position: float
 
     def initialize(self):
         # Optionally, print initial values or do setup
         print("Initializing arm move to setpoint")
-        self.arm_current_position = self.coral.get_arm_position()
-        self.elevator_current_position = self.coral.get_elevator_position()    
+        # self.arm_current_position = self.coral.get_arm_position()
+        # self.elevator_current_position = self.coral.get_elevator_position()    
 
     def execute(self):
         # Set motor to move towards target setpoint
         # Example logic: Set motor output based on PID, or some other method.
-        self.coral.move_to_setpoint(self.arm_setpoint, self.elevator_setpoint)  # You'll need to implement this in the subsystem
+
+        self.coral.move_to_arm_setpoint(self.arm_setpoint)   
+        self.coral.move_to_elevator_setpoint(self.elevator_setpoint) 
+
+        # self.coral.arm_closed_loop_controller.setReference(self.arm_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)
+        # self.coral.elevator_closed_loop_controller.setReference(self.elevator_setpoint, SparkLowLevel.ControlType.kMAXMotionPositionControl)
 
         # if self.arm_current_position is None:
         #     self.arm_current_position = 1
@@ -85,22 +91,23 @@ class MoveToSetpointCommand(Command):
         # else: 
         #     self.elevator_current_position = self.elevator_current_position
         
-        arm_current_position = self.arm_current_position
+        # arm_current_position = self.arm_current_position
         
-        elevator_current_position = self.elevator_current_position
-        self.arm_error = abs(self.arm_setpoint - arm_current_position)
-        self.elevator_error = abs(self.elevator_setpoint - elevator_current_position)
-        print(f"Arm Error: {self.arm_error}, Current Position: {self.arm_current_position}")
-        print(f"Elevator Error: {self.elevator_error}, Current Position: {self.elevator_current_position}")
+        # elevator_current_position = self.elevator_current_position
+        # self.arm_error = abs(self.arm_setpoint - arm_current_position)
+        # self.elevator_error = abs(self.elevator_setpoint - elevator_current_position)
+        # print(f"Arm Error: {self.arm_error}, Current Position: {self.arm_current_position}")
+        # print(f"Elevator Error: {self.elevator_error}, Current Position: {self.elevator_current_position}")
 
     def isFinished(self) -> bool:
         # Check if the error is small enough to stop
-        arm_tolerance = 2.0  # You may want to adjust this value
-        elevator_tolerance = 2.0
-        if self.arm_error < arm_tolerance and self.elevator_error < elevator_tolerance:
-            print("Setpoints reached or within tolerances.")
-            return True
-        return False
+        # arm_tolerance = 2.0  # You may want to adjust this value
+        # elevator_tolerance = 2.0
+        # if self.arm_error < arm_tolerance and self.elevator_error < elevator_tolerance:
+        #     print("Setpoints reached or within tolerances.")
+        #     return True
+        # return False
+        pass
 
     def end(self, interrupted: bool):
         # Any cleanup if necessary

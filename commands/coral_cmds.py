@@ -1,7 +1,6 @@
-from commands2 import SequentialCommandGroup, InstantCommand, WaitCommand, WaitUntilCommand
+from commands2 import SequentialCommandGroup
 from subsystems.coral_subsystem import CoralSubsystem
-from constants import Setpoint
-from commands.intake_cmd import ReleaseIntakeCommand, RunIntakeCommand, MoveToSetpointCommand
+from commands.intake_cmd import ReleaseIntakeCommand, RunIntakeCommand
 from commands.move_to_coral_station_cmd import MoveToCoralStation
 from commands.move_to_l1_cmd import MoveToL1Command
 from commands.move_to_l2_cmd import MoveToL2Command

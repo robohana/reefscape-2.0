@@ -1,7 +1,7 @@
 from math import pi
 import commands2
 
-from constants import DriveConstants
+from constants.constants import DriveConstants
 
 from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, ClosedLoopSlot
 

@@ -1,6 +1,6 @@
 from commands2 import Command
 from subsystems.coral_subsystem import CoralSubsystem
-from constants import Setpoint
+from constants.constants import Setpoint
 from rev import SparkBase
 
 class MoveToL3Command(Command):

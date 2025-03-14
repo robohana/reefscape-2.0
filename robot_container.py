@@ -93,13 +93,13 @@ class RobotContainer:
         # # OPERATOR Right Bumper -> Run Coral Intake in Reverse
         # self.operator_controller.rightBumper().whileTrue(self.release_intake_command) 
 
-        # OPERATOR B Button -> Elevator/Arm to human player position
+        # OPERATOR A Button -> Elevator/Arm to human player position
         self.operator_controller.a().onTrue(IntakeCoralStation(self.coral))
-        # OPERATOR X Button -> Elevator/Arm to level 2 position
+        # OPERATOR X Button -> Elevator/Arm to level 1 position
         self.operator_controller.x().onTrue(ScoreCoralL1(self.coral))
-        # OPERATOR X Button -> Elevator/Arm to level 2 position
+        # OPERATOR Y Button -> Elevator/Arm to level 2 position
         self.operator_controller.y().onTrue(ScoreCoralL2(self.coral))
-        # OPERATOR Y Button -> Elevator/Arm to level 3 position
+        # OPERATOR B Button -> Elevator/Arm to level 3 position
         self.operator_controller.b().onTrue(ScoreCoralL3(self.coral))
 
         # self.operator_controller.b().onTrue(InstantCommand(lambda: self.coral.elevator_motor.set(0.1), self.coral))

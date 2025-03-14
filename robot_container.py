@@ -8,7 +8,7 @@
 
  '''
 
-from commands2 import RunCommand, Command
+from commands2 import RunCommand, Command, StartEndCommand, InstantCommand
 from commands2.button import CommandXboxController
 from wpimath import applyDeadband
 from subsystems.coral_subsystem import CoralSubsystem
@@ -20,6 +20,10 @@ from commands.hang_cmd import HangCmd
 from commands.intake_cmd import RunIntakeCommand, ReleaseIntakeCommand, MoveToSetpointCommand
 from commands.auto_routines import SimpleAuto
 from commands.coral_cmds import ScoreCoralL1, ScoreCoralL2, ScoreCoralL3, IntakeCoralStation
+from commands.move_to_coral_station_cmd import MoveToCoralStation
+from commands.move_to_l1_cmd import MoveToL1Command
+from commands.move_to_l2_cmd import MoveToL2Command
+from commands.move_to_l3_cmd import MoveToL3Command
 
 
 class RobotContainer:
@@ -42,12 +46,6 @@ class RobotContainer:
         self.operator_controller = CommandXboxController(OIConstants.K_OPERATOR_CONTROLLER_PORT)  
 
         # Commands
-        self.hang_lift_command = HangCmd(self.hang, self.driver_controller, Setpoint.Hang.K_UP_POSITION)
-        self.hang_lower_command = HangCmd(self.hang, self.driver_controller, Setpoint.Hang.K_DOWN_POSITION)
-
-        # self.run_intake_command = RunIntakeCommand(self.coral)
-        # self.release_intake_command = ReleaseIntakeCommand(self.coral)
-
         
         # Configure default commands
         self.set_default_command()
@@ -103,11 +101,13 @@ class RobotContainer:
         # OPERATOR B Button -> Elevator/Arm to human player position
         self.operator_controller.a().onTrue(IntakeCoralStation(self.coral))
         # OPERATOR X Button -> Elevator/Arm to level 2 position
-        self.operator_controller.x().onTrue(ScoreCoralL2(self.coral))
+        self.operator_controller.x().onTrue(MoveToL1Command(self.coral))
         # OPERATOR X Button -> Elevator/Arm to level 2 position
-        self.operator_controller.y().onTrue(ScoreCoralL2(self.coral))
+        self.operator_controller.y().onTrue(MoveToL2Command(self.coral))
         # OPERATOR Y Button -> Elevator/Arm to level 3 position
-        self.operator_controller.b().onTrue(ScoreCoralL3(self.coral))
+        self.operator_controller.b().onTrue(MoveToL3Command(self.coral))
+
+        # self.operator_controller.b().onTrue(InstantCommand(lambda: self.coral.elevator_motor.set(0.1), self.coral))
 
         # DRIVER Start Button -> Zero swerve heading
         # self.driver_controller.start().onTrue(self.robot_drive.zero_heading())
@@ -122,8 +122,8 @@ class RobotContainer:
         # # DRIVER A Button -> Lower robot using setpoint only
         # self.driver_controller.a().onTrue(self.hang_lower_command())
 
-        self.driver_controller.y().onTrue(self.hang_lift_command)  # Press Y to go up
-        self.driver_controller.a().onTrue(self.hang_lower_command)  # Press A to go down     
+        # self.driver_controller.y().onTrue(self.hang_lift_command)  # Press Y to go up
+        # self.driver_controller.a().onTrue(self.hang_lower_command)  # Press A to go down     
 
         # self.driver_controller.rightBumper(self.hang.power_zero())
 

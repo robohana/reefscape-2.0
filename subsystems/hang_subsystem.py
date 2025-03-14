@@ -1,6 +1,6 @@
 import commands2
 from commands2 import StartEndCommand, InstantCommand
-from constants import HangSubSystemConstants, Setpoint
+from constants.constants import HangSubSystemConstants, Setpoint
 from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, MAXMotionConfig, SparkLowLevel
 from wpilib import SmartDashboard as sd
 

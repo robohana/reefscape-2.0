@@ -15,11 +15,10 @@ from wpimath.kinematics import (
     ChassisSpeeds,
     SwerveModuleState,
     SwerveDrive4Kinematics,
-    SwerveDrive4Odometry,
-    SwerveModulePosition
+    SwerveDrive4Odometry
 )
 
-from constants import RobotConstants, DriveConstants
+from constants.constants import RobotConstants, DriveConstants
 from wpilib import SmartDashboard as sd
 
 from subsystems.MAX_swerve_module import MAXSwerveModule

@@ -136,7 +136,7 @@ class Setpoint:
     K_POP = "Pop"
 
     class Arm:
-        K_CORAL_STATION = -12 # 33 for rev
+        K_CORAL_STATION = -13.5 # 33 for rev
         K_LEVEL_1 = 0
         K_LEVEL_2 = -43 # 2 for rev
         K_LEVEL_3 = -43 # 2 for rev
@@ -150,7 +150,7 @@ class Setpoint:
         K_POP = 0
 
     class Intake:
-        K_FORWARD = 0.62
+        K_FORWARD = 0.7
         K_REVERSE = -0.2
 
     class Hang:
@@ -166,15 +166,15 @@ class CoralSubsystemConstants:
     K_INTAKE_MOTOR_CHANNEL = 33 
 
     class Arm:
-        K_P = 0.25
+        K_P = 0.06
         K_I = 0
         K_D = 0
 
     class Elevator:
-        K_P = 0.9
+        K_P = 0.1
         K_I = 0
         K_D = 0
-        K_F = 0.5
+        K_F = 0.2
 
 class HangSubSystemConstants:
     K_HANG_MOTOR_CHANNEL = 34

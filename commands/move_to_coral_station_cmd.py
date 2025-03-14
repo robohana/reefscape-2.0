@@ -1,9 +1,7 @@
 from commands2 import Command
 from subsystems.coral_subsystem import CoralSubsystem
-from constants.constants import Setpoint
-from commands.intake_cmd import ReleaseIntakeCommand, RunIntakeCommand, MoveToSetpointCommand
-from constants.constants import Setpoint
-from rev import SparkLowLevel
+from constants import Setpoint
+from rev import SparkBase
 
 class MoveToCoralStation(Command):
     def __init__(self, coral: CoralSubsystem):

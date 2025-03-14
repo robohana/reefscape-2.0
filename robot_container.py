@@ -8,15 +8,14 @@
 
  '''
 
-from commands2 import RunCommand, Command, StartEndCommand, InstantCommand
+from commands2 import RunCommand, Command
 from commands2.button import CommandXboxController
 from wpimath import applyDeadband
 from subsystems.coral_subsystem import CoralSubsystem
 from subsystems.hang_subsystem import HangSubsystem
 from subsystems.drivetrain import DriveSubsystem
-from constants import AutoConstants, OIConstants, Setpoint
+from constants.constants import OIConstants
 from commands.SwerveJoystickCmd import SwerveJoystickCmd
-from commands.hang_cmd import HangCmd
 from commands.auto_routines import SimpleAuto
 from commands.coral_cmds import ScoreCoralL1, ScoreCoralL2, ScoreCoralL3, IntakeCoralStation
 

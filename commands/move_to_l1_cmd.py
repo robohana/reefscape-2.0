@@ -15,9 +15,6 @@ class MoveToL1Command(Command):
         pass
 
     def execute(self):
-        # self.coral.arm_closed_loop_controller.setReference(Setpoint.Arm.K_CORAL_STATION, SparkLowLevel.ControlType.kMAXMotionPositionControl)
-        # self.coral.elevator_closed_loop_controller.setReference(Setpoint.Elevator.K_CORAL_STATION, SparkLowLevel.ControlType.kMAXMotionPositionControl)
-
         self.coral.arm_closed_loop_controller.setReference(Setpoint.Arm.K_LEVEL_1, SparkBase.ControlType.kPosition)
         self.coral.elevator_closed_loop_controller.setReference(Setpoint.Elevator.K_LEVEL_1, SparkBase.ControlType.kPosition)
         

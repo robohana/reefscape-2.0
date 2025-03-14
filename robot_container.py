@@ -17,13 +17,9 @@ from subsystems.drivetrain import DriveSubsystem
 from constants import AutoConstants, OIConstants, Setpoint
 from commands.SwerveJoystickCmd import SwerveJoystickCmd
 from commands.hang_cmd import HangCmd
-from commands.intake_cmd import RunIntakeCommand, ReleaseIntakeCommand, MoveToSetpointCommand
 from commands.auto_routines import SimpleAuto
 from commands.coral_cmds import ScoreCoralL1, ScoreCoralL2, ScoreCoralL3, IntakeCoralStation
-from commands.move_to_coral_station_cmd import MoveToCoralStation
-from commands.move_to_l1_cmd import MoveToL1Command
-from commands.move_to_l2_cmd import MoveToL2Command
-from commands.move_to_l3_cmd import MoveToL3Command
+
 
 
 class RobotContainer:
@@ -101,11 +97,11 @@ class RobotContainer:
         # OPERATOR B Button -> Elevator/Arm to human player position
         self.operator_controller.a().onTrue(IntakeCoralStation(self.coral))
         # OPERATOR X Button -> Elevator/Arm to level 2 position
-        self.operator_controller.x().onTrue(MoveToL1Command(self.coral))
+        self.operator_controller.x().onTrue(ScoreCoralL1(self.coral))
         # OPERATOR X Button -> Elevator/Arm to level 2 position
-        self.operator_controller.y().onTrue(MoveToL2Command(self.coral))
+        self.operator_controller.y().onTrue(ScoreCoralL2(self.coral))
         # OPERATOR Y Button -> Elevator/Arm to level 3 position
-        self.operator_controller.b().onTrue(MoveToL3Command(self.coral))
+        self.operator_controller.b().onTrue(ScoreCoralL3(self.coral))
 
         # self.operator_controller.b().onTrue(InstantCommand(lambda: self.coral.elevator_motor.set(0.1), self.coral))
 

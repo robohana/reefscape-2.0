@@ -20,4 +20,5 @@ class MoveToL3Command(Command):
         return True
 
     def end(self, interrupted):
-        self.coral.stop_intake()
+        if interrupted is True:
+            return True

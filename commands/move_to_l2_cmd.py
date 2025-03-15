@@ -15,9 +15,10 @@ class MoveToL2Command(Command):
     def execute(self):
         self.coral.arm_closed_loop_controller.setReference(Setpoint.Arm.K_LEVEL_2, SparkBase.ControlType.kPosition)
         self.coral.elevator_closed_loop_controller.setReference(Setpoint.Elevator.K_LEVEL_2, SparkBase.ControlType.kPosition)
-        
+
     def isFinished(self):
         return True
 
     def end(self, interrupted):
-        self.coral.stop_intake()
+        if interrupted is True:
+            return True

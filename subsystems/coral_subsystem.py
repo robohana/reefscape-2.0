@@ -14,7 +14,7 @@ class CoralSubsystem(commands2.SubsystemBase):
         super().__init__()
 
         # arm_motor:      Angles the intake,              Spark Max,  Brushless, Closed Loop Controller, Relative Encoder
-        # elevator_motor: Raises and lowers the elevator, Spark Flex, Brushless, Closed Loop Controller, Absolute Encoder
+        # elevator_motor: Raises and lowers the elevator, Spark Flex, Brushless, Closed Loop Controller, Relative Encoder
         # intake_motor:   Controllers the intake rollers, Spark Max,  Brushless, None,                   None
         self.arm_motor = SparkMax(CoralSubsystemConstants.K_ARM_MOTOR_CHANNEL, SparkMax.MotorType.kBrushless)
         self.elevator_motor = SparkFlex(CoralSubsystemConstants.K_ELEVATOR_MOTOR_CHANNEL, SparkFlex.MotorType.kBrushless)
@@ -89,8 +89,8 @@ class CoralSubsystem(commands2.SubsystemBase):
     def move_to_setpoint(self, arm_current_target, elevator_current_target):
         self.arm_current_target = arm_current_target
         self.elevator_current_target = elevator_current_target
-        self.arm_closed_loop_controller.setReference(self.arm_current_target, SparkBase.ControlType.kMAXMotionPositionControl)
-        self.elevator_closed_loop_controller.setReference(self.elevator_current_target, SparkBase.ControlType.kMAXMotionPositionControl)
+        self.arm_closed_loop_controller.setReference(self.arm_current_target, SparkBase.ControlType.kPosition)
+        self.elevator_closed_loop_controller.setReference(self.elevator_current_target, SparkBase.ControlType.kPosition)
         
     # def move_to_arm_setpoint(self, arm_setpoint: float):
     #     ''' Drive the arm motor to the setpoint. '''
@@ -177,7 +177,7 @@ class CoralSubsystem(commands2.SubsystemBase):
         return StartEndCommand(
             lambda: self.set_intake_power(Setpoint.Intake.K_REVERSE),
             lambda: self.set_intake_power(0.0)
-        ) 
+        )
     
     def reverse_intake_power(self):
         self.set_intake_power(Setpoint.Intake.K_REVERSE)

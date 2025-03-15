@@ -1,8 +1,9 @@
 import time
 import wpilib
-from commands2 import Command, InstantCommand
+from commands2 import Command, InstantCommand, WaitUntilCommand, waitcommand
 from wpilib import Timer
 from subsystems.coral_subsystem import CoralSubsystem
+from wpimath.units import seconds
 
 class RunIntakeCommand(Command):
     def __init__(self, coral: CoralSubsystem):
@@ -41,20 +42,27 @@ class RunIntakeCommand(Command):
         """Called when the command ends or is interrupted."""
         self.coral.stop_intake()
 
-class ReleaseIntakeCommand(InstantCommand):        
+class ReleaseIntakeCommand(Command):        
     def __init__(self, coral: CoralSubsystem):
         super().__init__()
         self.coral = coral
         self.addRequirements(self.coral)
 
     def initialize(self):
-        pass
+        self.coral.run_intake_power() 
 
     def execute(self):
-        self.coral.reverse_intake_power()
+        self.coral.reverse_intake_power()  
+        
+        
+    def isFinished(self):
+        """End the command after popping intake."""
+        return False
 
     def end(self, interrupted):
-        self.coral.stop_intake()    
+        
+        if interrupted is True:
+            return True    
 
 class MoveToSetpointCommand(Command):
     def __init__(self, coral_subsystem: CoralSubsystem, arm_setpoint: float, elevator_setpoint: float) -> None:

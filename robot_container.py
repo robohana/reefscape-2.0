@@ -12,7 +12,6 @@ from commands2 import RunCommand, Command
 from commands2.button import CommandXboxController
 from wpimath import applyDeadband
 from subsystems.coral_subsystem import CoralSubsystem
-from subsystems.hang_subsystem import HangSubsystem
 from subsystems.drivetrain import DriveSubsystem
 from constants.constants import OIConstants
 from commands.SwerveJoystickCmd import SwerveJoystickCmd
@@ -34,7 +33,6 @@ class RobotContainer:
         # The robot's subsystems
         self.robot_drive = DriveSubsystem()
         self.coral = CoralSubsystem()
-        self.hang = HangSubsystem()
 
         # Controllers
         self.driver_controller = CommandXboxController(OIConstants.K_DRIVER_CONTROLLER_PORT)
@@ -89,9 +87,9 @@ class RobotContainer:
         # self.robotDrive.setDefaultCommand(SwerveJoystickCmd(self.robotDrive, self.driverController))
         
         # OPERATOR Left Bumper -> Run Coral Intake
-        # self.operator_controller.leftBumper().whileTrue(self.run_intake_command)
-        # # OPERATOR Right Bumper -> Run Coral Intake in Reverse
-        # self.operator_controller.rightBumper().whileTrue(self.release_intake_command) 
+        self.operator_controller.leftBumper().onTrue(self.coral.run_intake_command())
+        # # # OPERATOR Right Bumper -> Run Coral Intake in Reverse
+        self.operator_controller.rightBumper().whileTrue(self.coral.reverse_intake_command()) 
 
         # OPERATOR A Button -> Elevator/Arm to human player position
         self.operator_controller.a().onTrue(IntakeCoralStation(self.coral))

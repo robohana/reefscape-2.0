@@ -37,20 +37,21 @@ Class Naming (**PascalCase**:) \
 > Turn Sparks have even IDs \
 > Drive Sparks have odd IDs
 
-| Motor Name        | Can ID    |
-| :---              |   :---:   |
-| roboRIO           | 0         |
-| PDH               | 1         |
-| FRONT_LEFT_DRIVE  | 23        |
-| FRONT_LEFT_STEER  | 22        |
-| FRONT_RIGHT_DRIVE | 21        |
-| FRONT_RIGHT_STEER | 20        |
-| BACK_LEFT_DRIVE   | 25        |
-| BACK_LEFT_STEER   | 24        |
-| BACK_RIGHT_DRIVE  | 27        |
-| BACK_RIGHT_STEER  | 26        |
-| INTAKE_MOTOR      | 33        |
-| ARM_MOTOR         | 31        |
-| ELEVATOR_MOTOR    | 32        |
-| HANG_MOTOR        | 34        |
+| Motor Name          | Can ID    |
+| :---                |   :---:   |
+| roboRIO             | 0         |
+| PDH                 | 1         |
+| FRONT_LEFT_DRIVE    | 23        |
+| FRONT_LEFT_STEER    | 22        |
+| FRONT_RIGHT_DRIVE   | 21        |
+| FRONT_RIGHT_STEER   | 20        |
+| BACK_LEFT_DRIVE     | 25        |
+| BACK_LEFT_STEER     | 24        |
+| BACK_RIGHT_DRIVE    | 27        |
+| BACK_RIGHT_STEER    | 26        |
+| INTAKE_MOTOR        | 33        |
+| ARM_MOTOR           | 31        |
+| ELEVATOR_MOTOR      | 32        |
+| ANGLE_MOTOR (algee) | 34        |
+| ROLLER_MOTOR (algee)| 35        |
 

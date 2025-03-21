@@ -46,7 +46,7 @@ Class Naming (**PascalCase**:) \
 | FRONT_RIGHT_DRIVE | 21        |
 | FRONT_RIGHT_STEER | 20        |
 | BACK_LEFT_DRIVE   | 25        |
-| BACK_LEFT_STREER  | 24        |
+| BACK_LEFT_STEER   | 24        |
 | BACK_RIGHT_DRIVE  | 27        |
 | BACK_RIGHT_STEER  | 26        |
 | INTAKE_MOTOR      | 33        |

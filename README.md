@@ -33,9 +33,12 @@ Class Naming (**PascalCase**:) \
  • If a class represents a command, use Command at the end. \
 
 ## Notes
-### Constants Tiles/Folder
+### Constants Files/Folder
 > All the constants that we will use in the actual code live inside of constants.constants \
 > When using constants in other files, you import from constants.constants only what you need
+
+### Imports
+> Import only what you need so that our imports can run smoothly
 
 ## Motor Information
 > Turn Sparks have even IDs \

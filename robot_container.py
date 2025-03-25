@@ -1,205 +1,147 @@
-# #!/usr/bin/env python3
+# Type: RobotContainer
 
+'''
+# The RobotContainer is where you will configure your robot. The container is where you will define your subsystems, commands, and button bindings. 
+# The container is created in robot.py and passed to the TimedCommandRobot. 
+# The TimedCommandRobot will call the getAutonomousCommand method to get the command to run during autonomous. 
+# The container will also set the default commands for the subsystems
 
-from math import pi
-from wpimath.filter import SlewRateLimiter
-from wpimath.geometry import Translation2d
-from wpimath.kinematics import SwerveDrive4Kinematics
-from wpimath import units
+ '''
 
-
-
-class DriveConstants:
-    # Constants for the swerve module 
-
-    # Motion and Drive control limiters
-    # Slew rate limits for different drive parameters
-    # K_DIRECTION_SLEW_RATE = 1.2  # radians per second
-    # K_MAGNITUDE_SLEW_RATE = 1.8  # percent per second (1 = 100%)
-    # K_ROTATIONAL_SLEW_RATE = 2.0  # percent per second (1 = 100%)
-
-    # # Speed limiters for drive and rotation
-    # K_DRIVING_SPEED_LIMITER = 1  # Adjust this value as needed
-    # K_ROTATION_SPEED_LIMITER = 1  # Adjust this value as needed
-
-    # # Voltage limiter for controlling motor voltage
-    # K_VOLTAGE_LIMITER = SlewRateLimiter(0.5)  # Assuming SlewRateLimiter takes a rate value (in volts or time scale)
-
-# Drivetrain PID Constants
-    K_DRIVE_P = 0.1
-    K_DRIVE_I = 0
-    K_DRIVE_D = 0
-
-    K_DRIVE_KS = 0.1
-    K_DRIVE_KV = 1
-
-    K_TURN_P = 1
-    K_TURN_I = 0
-    K_TURN_D = 0
-
-    K_TURN_KS = 0.1
-    K_TURN_KV = 1
-
-    K_DRIVING_MOTOR_PINION_TEETH = 13
-
-    K_WHEEL_DIAMETER_METERS = 0.0762
-    K_WHEEL_RADIUS_METERS = K_WHEEL_DIAMETER_METERS / 2 # ~ 0.0508
-    K_WHEEL_CIRCUMFERENCE_METERS = K_WHEEL_DIAMETER_METERS * pi
-   
-    K_DRIVING_MOTOR_REDUCTION = (45.0 * 22) / (K_DRIVING_MOTOR_PINION_TEETH * 15)
-    K_FREE_SPEED_RPM = 5676 # drive motor
-    K_DRIVING_MOTOR_FREE_SPEED_RPM = K_FREE_SPEED_RPM / 60
-
-    K_DRIVE_WHEEL_FREE_SPEED_RPS = (K_DRIVING_MOTOR_FREE_SPEED_RPM * K_WHEEL_CIRCUMFERENCE_METERS) / K_DRIVING_MOTOR_REDUCTION   
-    
-    # Movement Constants
-    # Physical robot movement limits (in feet and meters)
-    K_MAX_SPEED_METERS_PER_SECOND = 4.46
-    K_MAX_ANGULAR_SPEED = 2 * pi
-
-    # Physical max angular velocity (in meters per second)
-    # K_PHYSICAL_MAX_ANGULAR_VELOCITY_METERS_PER_SECOND = K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND / K_WHEEL_RADIUS_METERS  # rad/s
-
-    # Teleop drive limits (adjustments for speed, angular speed, and acceleration)
-    # K_TELE_DRIVE_MAX_SPEED_METERS_PER_SECOND = K_PHYSICAL_MAX_SPEED_METERS_PER_SECOND / 1  # to be adjusted
-    # K_TELE_DRIVE_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = (kMaxSpeedMetersPerSecond * 2 / K_WHEEL_DIAMETER_METERS) / 2  # rad/s
-    # K_TELE_DRIVE_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3  # to be adjusted
-    # K_TELE_DRIVE_MAX_ANGULAR_ACCELERATION_UNITS_PER_SECOND = 3  # to be adjusted 
+from commands2 import RunCommand, Command
+from commands2.button import CommandXboxController
+from wpimath import applyDeadband
+from subsystems.coral_subsystem import CoralSubsystem
+from subsystems.drivetrain import DriveSubsystem
+from constants.constants import OIConstants
+from commands.SwerveJoystickCmd import SwerveJoystickCmd
+from commands.auto_routines import SimpleAuto
+from commands.coral_cmds import IntakeToZero, ScoreCoralL2, ScoreCoralL3, IntakeCoralStation
+from subsystems.algae_subsystem import AlgaeSubsystem
+from commands.algae_cmds import AlgaeLoadCommand, AlgaeScoreCommand, AlgaeZeroCommand, AlgaeOnCommand
 
 
 
+class RobotContainer:
+    """
+    This class is where the bulk of the robot should be declared. Since Command-based is a
+    "declarative" paradigm, very little robot logic should actually be handled in the :class:`.Robot`
+    periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+    subsystems, commands, and button mappings) should be declared here.
+    """
 
-class OIConstants:
-    # Constants for the Operator Interface
+    def __init__(self) -> None:
 
-    K_DRIVER_CONTROLLER_PORT = 0
-    K_OPERATOR_CONTROLLER_PORT = 1
-    DEADZONE = 0.1
+        # The robot's subsystems
+        self.robot_drive = DriveSubsystem()
+        self.coral = CoralSubsystem()
+        self.algae = AlgaeSubsystem()
 
-class RobotConstants:
+        # Controllers
+        self.driver_controller = CommandXboxController(OIConstants.K_DRIVER_CONTROLLER_PORT)
+        self.operator_controller = CommandXboxController(OIConstants.K_OPERATOR_CONTROLLER_PORT)  
 
-        # Robot Dimemsions
-    K_TRACK_WIDTH = units.inchesToMeters(23.375) # ~23 3/8 in, ~0.593725m
-     # Distance between centers of right and left wheels
-    K_WHEEL_BASE = units.inchesToMeters(23.375) # ~23 3/8 in, ~0.593725m
-     # Distance between centers of front and back wheels
+        # Commands
+        
+        # Configure default commands
+        self.set_default_command()
 
-    K_GYRO_REVERSED = False
-    
-    # Front left module constants
-    K_FRONT_LEFT_DRIVE_ID = 23
-    K_FRONT_LEFT_TURN_ID = 22
-    K_FRONT_LEFT_DRIVING_MOTOR_REVERSED = False
-    K_FRONT_LEFT_TURNING_MOTOR_REVERSED = False
-    K_FRONT_LEFT_CHASSIS_ANGULAR_OFFSET = -pi / 2
+        # Configure the button bindings
+        self.configure_button_bindings()
 
-    # Front right module constants
-    K_FRONT_RIGHT_DRIVE_ID = 21
-    K_FRONT_RIGHT_TURN_ID = 20
-    K_FRONT_RIGHT_DRIVING_MOTOR_REVERSED = True
-    K_FRONT_RIGHT_TURNING_MOTOR_REVERSED = False
-    K_FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET = 0
+        
 
-    # Back left module constants
-    K_BACK_LEFT_DRIVE_ID = 25
-    K_BACK_LEFT_TURN_ID = 24
-    K_BACK_LEFT_DRIVING_MOTOR_REVERSED = False
-    K_BACK_LEFT_TURNING_MOTOR_REVERSED = False
-    K_BACK_LEFT_CHASSIS_ANGULAR_OFFSET = pi
+        # self.robotDrive.setDefaultCommand(
+        #     SwerveJoystickCmd(self.robotDrive, self.driverController)
+        # )
 
-    # Back right module constants
-    K_BACK_RIGHT_DRIVE_ID = 27
-    K_BACK_RIGHT_TURN_ID = 26
-    K_BACK_RIGHT_DRIVING_MOTOR_REVERSED = True
-    K_BACK_RIGHT_TURNING_MOTOR_REVERSED = False
-    K_BACK_RIGHT_CHASSIS_ANGULAR_OFFSET = pi/2
+        # # Configure default commands
+        # self.robotDrive.setDefaultCommand(
+        #     SwerveJoystickCmd(
+        #         robotDrive = self.robotDrive, driverController = self.driverController
+        #     )
+        # )
+        
+        # Configure the button bindings
+
+    def set_default_command (self) -> None:
+        # The left stick controlls translantion of the robot.
+        # Turning is controled by the X axis of the right stick
+
+        self.robot_drive.setDefaultCommand(
+            RunCommand(
+                lambda: self.robot_drive.drive(
+                    applyDeadband(self.driver_controller.getLeftY() * -1, OIConstants.DEADZONE),
+                    applyDeadband(self.driver_controller.getLeftX() * -1, OIConstants.DEADZONE),
+                    applyDeadband(self.driver_controller.getRightX() * -1, OIConstants.DEADZONE),
+                    True
+                ),
+                self.robot_drive 
+            ) 
+        )
 
 
-    K_FRONT_LEFT_LOCATION = Translation2d(K_WHEEL_BASE / 2 , K_TRACK_WIDTH / 2) 
-    K_FRONT_RIGHT_LOCATION = Translation2d(K_WHEEL_BASE / 2 , -K_TRACK_WIDTH / 2)
-    K_BACK_LEFT_LOCATION = Translation2d(-K_WHEEL_BASE / 2 , K_TRACK_WIDTH / 2)
-    K_BACK_RIGHT_LOCATION =  Translation2d(-K_WHEEL_BASE / 2 , -K_TRACK_WIDTH / 2)
+    def configure_button_bindings(self) -> None:
+        """
+        Use this method to define your button->command mappings. Buttons can be created by
+        instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
+        and then passing it to a JoystickButton.
+        # """
+        # self.robotDrive.setDefaultCommand(SwerveJoystickCmd(self.robotDrive, self.driverController))
+        
+        # OPERATOR Left Bumper -> Run Coral Intake
+        self.operator_controller.leftBumper().whileTrue(self.coral.run_intake_command())
+        # # # OPERATOR Right Bumper -> Run Coral Intake in Reverse
+        self.operator_controller.rightBumper().whileTrue(self.coral.reverse_intake_command()) 
 
-        # Kinematics Constants
-    KINEMATICS = SwerveDrive4Kinematics(
-        K_FRONT_LEFT_LOCATION,
-        K_FRONT_RIGHT_LOCATION,
-        K_BACK_LEFT_LOCATION,
-        K_BACK_RIGHT_LOCATION
-    )
+        # OPERATOR A Button -> Elevator/Arm to human player position
+        self.operator_controller.a().onTrue(IntakeCoralStation(self.coral))
+        # OPERATOR X Button -> Elevator/Arm to level 1 position
+        self.operator_controller.x().onTrue(IntakeToZero(self.coral))
+        # OPERATOR Y Button -> Elevator/Arm to level 2 position
+        self.operator_controller.y().onTrue(ScoreCoralL2(self.coral))
+        # OPERATOR B Button -> Elevator/Arm to level 3 position
+        self.operator_controller.b().onTrue(ScoreCoralL3(self.coral))
 
-class Setpoint:
-    K_CORAL_STATION = "Coral Station"
-    K_LEVEL_1 = "1"
-    K_LEVEL_2 = "2"
-    K_LEVEL_3 = "3"
-    K_POP = "Pop"
+        # OPERATOR D-PAD DOWN -> Algae Grabber/Roller to load position
+        self.operator_controller.povDown().onTrue(AlgaeLoadCommand(self.algae))
+        # OPERATOR D-PAD UP -> Algae Grabber/Roller to zero position
+        self.operator_controller.povUp().onTrue(AlgaeZeroCommand(self.algae))
+        # OPERATOR D PAD RIGHT -> Algae Grabber/Roller to load position
+        self.operator_controller.povRight().onTrue(AlgaeScoreCommand(self.algae))
+        # OPERATOR LEFT TRIGGER -> Algae Roller On
+        self.operator_controller.leftTrigger().whileTrue(AlgaeOnCommand(self.algae))
 
-    class Arm:
-        K_CORAL_STATION = -13.5 # 33 for rev
-        K_LEVEL_1 = 0
-        K_LEVEL_2 = -43 # 2 for rev
-        K_LEVEL_3 = -43 # 2 for rev
-        K_POP = -14
+        # self.operator_controller.b().onTrue(InstantCommand(lambda: self.coral.elevator_motor.set(0.1), self.coral))
 
-    class Elevator:
-        K_CORAL_STATION = 0 
-        K_LEVEL_1 = 0
-        K_LEVEL_2 = 6
-        K_LEVEL_3 = 69   # 100 for rev 
-        K_POP = 0
+        # DRIVER Start Button -> Zero swerve heading
+        self.driver_controller.x().onTrue(self.robot_drive.zero_heading())
+        
+        # DRIVER Y Button -> Lift robot using power only
+        # self.driver_controller.y().onTrue(self.hang.lift_command_power())
+        # # DRIVER X Button -> Lower robot using power only
+        # self.driver_controller.x().onTrue(self.hang.lower_command_power())
 
-    class Intake:
-        K_FORWARD = 0.7
-        K_REVERSE = -0.2
+        # # DRIVER B Button -> Lift robot using setpoint only
+        # self.driver_controller.b().onTrue(self.hang_lift_command())
+        # # DRIVER A Button -> Lower robot using setpoint only
+        # self.driver_controller.a().onTrue(self.hang_lower_command())
 
-    class Hang:
-        # K_FORWARD = 0.1
-        # K_REVERSE = -0.1
-        K_UP_POSITION = 1
-        K_DOWN_POSITION = -1     
+        # self.driver_controller.y().onTrue(self.hang_lift_command)  # Press Y to go up
+        # self.driver_controller.a().onTrue(self.hang_lower_command)  # Press A to go down     
 
-class CoralSubsystemConstants:
-    # can Ids
-    K_ARM_MOTOR_CHANNEL = 31
-    K_ELEVATOR_MOTOR_CHANNEL = 32 
-    K_INTAKE_MOTOR_CHANNEL = 33 
+        # self.driver_controller.rightBumper(self.hang.power_zero())
 
-    class Arm:
-        K_P = 0.06
-        K_I = 0
-        K_D = 0
 
-    class Elevator:
-        K_P = 0.1
-        K_I = 0
-        K_D = 0
-        K_F = 0.2
+    def disablePIDSubsystems(self) -> None:
+        """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
+        This should be called on robot disable to prevent integral windup."""
+        pass
 
-class AlgaeSubsystemConstants:
-    #can Ids
-    K_ANGLE_MOTOR_CHANNEL = 34
-    K_ROLLER_MOTOR_CHANNEL = 35
-    # PID for the angle motor
-    K_P = 0.1
-    K_I = 0
-    K_D = 0
+    def getAutonomousCommand(self) -> Command:
+        """Use this to pass the autonomous command to the main {@link Robot} class.
 
-# roller power
-    K_FORWARD = 0.1
-    K_REVERSE = -0.1
-
-# class HangSubSystemConstants:
-#     K_HANG_MOTOR_CHANNEL = 34
-#     K_ENCODER_CONVERSION_FACTOR = 32.1 # 8192 / 255
-
-#     K_P = 0.25
-#     K_I = 0
-#     K_D = 0    
-
-class AutoConstants:
-    K_MAX_SPEED_METERS_PER_SECOND = 3
-    K_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3
-    K_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = pi
-    K_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND_SQUARED = pi
-    
+        :returns: the command to run in autonomous
+        """
+        # pass
+        return SimpleAuto(self.robot_drive)

@@ -19,6 +19,7 @@ from commands.auto_routines import SimpleAuto
 from commands.coral_cmds import IntakeToZero, ScoreCoralL2, ScoreCoralL3, IntakeCoralStation
 from subsystems.algae_subsystem import AlgaeSubsystem
 from commands.algae_cmds import AlgaeLoadCommand, AlgaeScoreCommand, AlgaeZeroCommand, AlgaeOnCommand
+from commands.auto_routine_with_camera import SimpleScoreAuto
 
 
 
@@ -144,4 +145,4 @@ class RobotContainer:
         :returns: the command to run in autonomous
         """
         # pass
-        return SimpleAuto(self.robot_drive)
+        return SimpleScoreAuto(self.robot_drive, self.coral, 22)

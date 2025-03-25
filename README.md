@@ -32,6 +32,10 @@ Class Naming (**PascalCase**:) \
  • ```subsystems```, ```commands```, and helper classes should be PascalCase. \
  • If a class represents a command, use Command at the end. \
 
+## Notes
+### Constants Tiles/Folder
+> All the constants that we will use in the actual code live inside of constants.constants \
+> When using constants in other files, you import from constants.constants only what you need
 
 ## Motor Information
 > Turn Sparks have even IDs \

@@ -3,9 +3,12 @@ import wpilib
 from commands2 import Command
 from ntcore import NetworkTableInstance
 from subsystems.drivetrain import DriveSubsystem
+import limelight
+import limelightresults
+from constants.constants import AutoConstants
 
 class DriveToLimelightTarget(Command):
-    def __init__(self, drivetrain: DriveSubsystem, target_area_threshold=5.0, drive_speed=0.5, target_tag_id=None):
+    def __init__(self, drivetrain: DriveSubsystem, target_area_threshold=2.12, drive_speed=0.15, target_tag_id=22):
         """
         Drives forward until the Limelight target area exceeds a threshold.
         
@@ -18,32 +21,41 @@ class DriveToLimelightTarget(Command):
         self.target_area_threshold = target_area_threshold
         self.drive_speed = drive_speed
         self.target_tag_id = target_tag_id
-        self.table = NetworkTableInstance.getDefault().getTable("scoreCoral")
+        self.table = NetworkTableInstance.getDefault().getTable("limelight")
         self.addRequirements(self.drivetrain)
         
         # Simple proportional control for turning based on tx (horizontal offset)
-        self.kP_turn = 0.03
+        self.kP_turn = 0.017
+        self.kP_forward = 0.009
 
     def initialize(self):
         print("DriveToLimelightTarget: Initialized")
         
     def execute(self):
-        # Get target valid (tv), horizontal offset (tx), and target area (ta)
+        # Get target valid (tv), horizontal offset (tx), target area (ta), vertical offset (ty)
         tv = self.table.getNumber("tv", 0)
         tx = self.table.getNumber("tx", 0)
         ta = self.table.getNumber("ta", 0)
+        ty = self.table.getNumber("ty", 0)
         
+
+        limelightresults.FiducialResult(tx)
+
         # If a target is seen:
         if tv >= 1.0:
             print("I see my target...")
             # Compute a turning correction (if tx is non-zero, rotate to center the target)
             turn_correction = -tx * self.kP_turn  # negative because positive tx means target is right, so we need to turn left.
+            turn_correction *= AutoConstants.K_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND
+            forward_corractions = ty * self.kP_forward
+            forward_corractions *= AutoConstants.K_MAX_SPEED_METERS_PER_SECOND
             # Drive forward at drive_speed with correction
-            self.drivetrain.drive(self.drive_speed, 0, turn_correction, True)
-            print(f"Driving: tx={tx}, ta={ta}, turn_correction={turn_correction}")
+            # TODO: need x value to be ty, say like forward position = ty * kp forward, apply this value to the drive speed
+            self.drivetrain.drive(forward_corractions, 0, turn_correction, False)
+            print(f"Driving: tx={tx}, ty={ty}, ta={ta}, turn_correction={turn_correction}")
         else:
             # No target seen
-            self.drivetrain.drive(0, 0, 0, True)
+            self.drivetrain.drive(0, 0, 0, False)
             print("DriveToLimelightTarget: No target detected")
         
     def isFinished(self):
@@ -56,5 +68,5 @@ class DriveToLimelightTarget(Command):
 
     def end(self, interrupted):
         if interrupted is True:
-            self.drivetrain.drive(0, 0, 0, True)
+            self.drivetrain.drive(0, 0, 0, False)
             print("DriveToLimelightTarget: Command ended")

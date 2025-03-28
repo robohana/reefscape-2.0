@@ -74,7 +74,7 @@ class OIConstants:
 
     K_DRIVER_CONTROLLER_PORT = 0
     K_OPERATOR_CONTROLLER_PORT = 1
-    DEADZONE = 0.1
+    DEADZONE = 0.15
 
 class RobotConstants:
 
@@ -145,19 +145,27 @@ class Setpoint:
     class Elevator:
         K_CORAL_STATION = 0 
         K_LEVEL_1 = 0
-        K_LEVEL_2 = 6
-        K_LEVEL_3 = 69   # 100 for rev 
+        K_LEVEL_2 = 1
+        K_LEVEL_3 = 30   # 100 for rev 
         K_POP = 0
 
     class Intake:
         K_FORWARD = 0.7
-        K_REVERSE = -0.2
+        K_REVERSE = -0.4
 
-    class Hang:
-        # K_FORWARD = 0.1
-        # K_REVERSE = -0.1
-        K_UP_POSITION = 1
-        K_DOWN_POSITION = -1     
+    # class Hang:
+    #     # K_FORWARD = 0.1
+    #     # K_REVERSE = -0.1
+    #     K_UP_POSITION = 1
+    #     K_DOWN_POSITION = -1  
+
+    class Algae:
+        K_LOAD_POSITION = -16
+        K_LOCKED_POSITION = 0
+
+        K_LOAD_POWER = -1
+        K_SCORE_POWER = 0.5
+        K_LOCKED_POWER = 0.0
 
 class CoralSubsystemConstants:
     # can Ids
@@ -176,17 +184,29 @@ class CoralSubsystemConstants:
         K_D = 0
         K_F = 0.2
 
-class HangSubSystemConstants:
-    K_HANG_MOTOR_CHANNEL = 34
-    K_ENCODER_CONVERSION_FACTOR = 32.1 # 8192 / 255
-
-    K_P = 0.25
+class AlgaeSubsystemConstants:
+    #can Ids
+    K_ANGLE_MOTOR_CHANNEL = 34
+    K_ROLLER_MOTOR_CHANNEL = 35
+    # PID for the angle motor
+    K_P = 0.9
     K_I = 0
-    K_D = 0    
+    K_D = 0
+
+# class HangSubSystemConstants:
+#     K_HANG_MOTOR_CHANNEL = 34
+#     K_ENCODER_CONVERSION_FACTOR = 32.1 # 8192 / 255
+
+#     K_P = 0.25
+#     K_I = 0
+#     K_D = 0    
 
 class AutoConstants:
-    K_MAX_SPEED_METERS_PER_SECOND = 3
+    K_MAX_SPEED_METERS_PER_SECOND = 2
     K_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3
     K_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = pi
     K_MAX_ANGULAR_SPEED_RADIANS_PER_SECOND_SQUARED = pi
     
+class BlinkinColor:
+    ORANGE = 0.63
+    GREEN = 0.77

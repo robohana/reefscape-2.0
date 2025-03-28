@@ -10,17 +10,23 @@
 
 from commands2 import RunCommand, Command
 from commands2.button import CommandXboxController
+
 from wpimath import applyDeadband
+from wpimath.filter import SlewRateLimiter
+from wpilib import SmartDashboard as sd, SendableChooser
+
 from subsystems.coral_subsystem import CoralSubsystem
 from subsystems.drivetrain import DriveSubsystem
+from subsystems.algae_subsystem import AlgaeSubsystem
+
 from constants.constants import OIConstants
+
 from commands.SwerveJoystickCmd import SwerveJoystickCmd
 from commands.auto_routines import SimpleAuto
 from commands.coral_cmds import IntakeToZero, ScoreCoralL2, ScoreCoralL3, IntakeCoralStation
-from subsystems.algae_subsystem import AlgaeSubsystem
 from commands.algae_cmds import AlgaeLoadCommand, AlgaeScoreCommand, AlgaeZeroCommand, AlgaeOnCommand
 from commands.auto_routine_with_camera import SimpleScoreAuto
-
+from commands.auto_align_scoring_cmd import AutoAlignScoringCommand
 
 
 class RobotContainer:
@@ -42,29 +48,27 @@ class RobotContainer:
         self.driver_controller = CommandXboxController(OIConstants.K_DRIVER_CONTROLLER_PORT)
         self.operator_controller = CommandXboxController(OIConstants.K_OPERATOR_CONTROLLER_PORT)  
 
-        # Commands
+        # Slew Rate Limiter to make joystick inputs more gental 1/3 sec from 0 to 1
+        self.x_speed_limiter = SlewRateLimiter(3)
+        self.y_speed_limiter = SlewRateLimiter(3)
+        self.rot_limiter = SlewRateLimiter(3)
         
+        # April Tag Chooser
+        self.targetAprilTagChooser = SendableChooser()
+        self.targetAprilTagChooser.setDefaultOption("Tag 9", 9)
+        self.targetAprilTagChooser.addOption("Tag 7", 7)
+        self.targetAprilTagChooser.addOption("Tag 11", 11)
+        sd.putData("Target AprilTag", self.targetAprilTagChooser)
+
+
         # Configure default commands
         self.set_default_command()
 
         # Configure the button bindings
         self.configure_button_bindings()
-
+                                        
         
-
-        # self.robotDrive.setDefaultCommand(
-        #     SwerveJoystickCmd(self.robotDrive, self.driverController)
-        # )
-
-        # # Configure default commands
-        # self.robotDrive.setDefaultCommand(
-        #     SwerveJoystickCmd(
-        #         robotDrive = self.robotDrive, driverController = self.driverController
-        #     )
-        # )
-        
-        # Configure the button bindings
-
+    # Set default command
     def set_default_command (self) -> None:
         # The left stick controlls translantion of the robot.
         # Turning is controled by the X axis of the right stick
@@ -72,29 +76,31 @@ class RobotContainer:
         self.robot_drive.setDefaultCommand(
             RunCommand(
                 lambda: self.robot_drive.drive(
-                    applyDeadband(self.driver_controller.getLeftY() * -1, OIConstants.DEADZONE),
-                    applyDeadband(self.driver_controller.getLeftX() * -1, OIConstants.DEADZONE),
-                    applyDeadband(self.driver_controller.getRightX() * -1, OIConstants.DEADZONE),
+                    # Apply Slew Rate Limiters then Apply Deadband
+                    self.x_speed_limiter.calculate(applyDeadband(self.driver_controller.getLeftY() * -1, OIConstants.DEADZONE)),
+                    self.y_speed_limiter.calculate(applyDeadband(self.driver_controller.getLeftX() * -1, OIConstants.DEADZONE)),
+                    self.rot_limiter.calculate(applyDeadband(self.driver_controller.getRightX() * -1, OIConstants.DEADZONE)),
                     True
                 ),
                 self.robot_drive 
             ) 
         )
 
-
+    # Configure the button bindings
     def configure_button_bindings(self) -> None:
         """
         Use this method to define your button->command mappings. Buttons can be created by
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
-        # """
-        # self.robotDrive.setDefaultCommand(SwerveJoystickCmd(self.robotDrive, self.driverController))
-        
+        # """  
+      
+        """Coral Roller Controls"""        
         # OPERATOR Left Bumper -> Run Coral Intake
         self.operator_controller.leftBumper().whileTrue(self.coral.run_intake_command())
-        # # # OPERATOR Right Bumper -> Run Coral Intake in Reverse
+        # OPERATOR Right Bumper -> Run Coral Intake in Reverse
         self.operator_controller.rightBumper().whileTrue(self.coral.reverse_intake_command()) 
 
+        """Elevator and Arm Controls for various positions"""
         # OPERATOR A Button -> Elevator/Arm to human player position
         self.operator_controller.a().onTrue(IntakeCoralStation(self.coral))
         # OPERATOR X Button -> Elevator/Arm to level 1 position
@@ -104,6 +110,7 @@ class RobotContainer:
         # OPERATOR B Button -> Elevator/Arm to level 3 position
         self.operator_controller.b().onTrue(ScoreCoralL3(self.coral))
 
+        """Algae Controls"""    
         # OPERATOR D-PAD DOWN -> Algae Grabber/Roller to load position
         self.operator_controller.povDown().onTrue(AlgaeLoadCommand(self.algae))
         # OPERATOR D-PAD UP -> Algae Grabber/Roller to zero position
@@ -113,25 +120,19 @@ class RobotContainer:
         # OPERATOR LEFT TRIGGER -> Algae Roller On
         self.operator_controller.leftTrigger().whileTrue(AlgaeOnCommand(self.algae))
 
-        # self.operator_controller.b().onTrue(InstantCommand(lambda: self.coral.elevator_motor.set(0.1), self.coral))
+        """Zero Swerve Heading Control"""
+        # DRIVER A Button -> Zero swerve heading
+        self.driver_controller.a().onTrue(self.robot_drive.zero_heading())
 
-        # DRIVER Start Button -> Zero swerve heading
-        self.driver_controller.x().onTrue(self.robot_drive.zero_heading())
-        
-        # DRIVER Y Button -> Lift robot using power only
-        # self.driver_controller.y().onTrue(self.hang.lift_command_power())
-        # # DRIVER X Button -> Lower robot using power only
-        # self.driver_controller.x().onTrue(self.hang.lower_command_power())
-
-        # # DRIVER B Button -> Lift robot using setpoint only
-        # self.driver_controller.b().onTrue(self.hang_lift_command())
-        # # DRIVER A Button -> Lower robot using setpoint only
-        # self.driver_controller.a().onTrue(self.hang_lower_command())
-
-        # self.driver_controller.y().onTrue(self.hang_lift_command)  # Press Y to go up
-        # self.driver_controller.a().onTrue(self.hang_lower_command)  # Press A to go down     
-
-        # self.driver_controller.rightBumper(self.hang.power_zero())
+        """Auto Align Controls"""
+        # Bind scoring left to x:
+        self.driver_controller.x().onTrue(
+            AutoAlignScoringCommand(self.robot_drive, scoring_mode='left')
+        )
+        # Bind scoring right to b:
+        self.driver_controller.b().onTrue(
+            AutoAlignScoringCommand(self.robot_drive, scoring_mode='right')
+        )
 
 
     def disablePIDSubsystems(self) -> None:
@@ -140,9 +141,9 @@ class RobotContainer:
         pass
 
     def getAutonomousCommand(self) -> Command:
-        """Use this to pass the autonomous command to the main {@link Robot} class.
+        """Selects and returns the autonomous command based on the chooser settings."""
+        targetTag = self.targetAprilTagChooser.getSelected()
 
-        :returns: the command to run in autonomous
-        """
-        # pass
-        return SimpleScoreAuto(self.robot_drive, self.coral, 22)
+
+
+        return SimpleScoreAuto(self.robot_drive, self.coral, targetTag)

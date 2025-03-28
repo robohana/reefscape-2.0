@@ -3,7 +3,8 @@ from commands2 import SequentialCommandGroup, InstantCommand
 from subsystems.drivetrain import DriveSubsystem
 from subsystems.coral_subsystem import CoralSubsystem
 from commands.drive_to_target import DriveToLimelightTarget
-from commands.coral_cmds import ScoreCoralL2
+from commands.coral_cmds import ScoreCoralL3
+from commands.auto_align_scoring_cmd import AutoAlignScoringCommand
 
 class SimpleScoreAuto(SequentialCommandGroup):
     def __init__(self, drivetrain: DriveSubsystem, coral: CoralSubsystem, target_tag_id: 22):
@@ -21,9 +22,9 @@ class SimpleScoreAuto(SequentialCommandGroup):
         
         self.addCommands(
             # Drive to target using Limelight data
-            DriveToLimelightTarget(drivetrain, target_area_threshold=2.0, drive_speed=0.15, target_tag_id=target_tag_id),
+            AutoAlignScoringCommand(drivetrain, 'left', 1.0, 1.0),
             InstantCommand(lambda: drivetrain.drive(0, 0, 0, False), drivetrain),
             # Score a coral at L2
-            ScoreCoralL2(coral)
+            ScoreCoralL3(coral)
             
         )

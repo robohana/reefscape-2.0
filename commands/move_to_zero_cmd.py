@@ -3,7 +3,7 @@ from subsystems.coral_subsystem import CoralSubsystem
 from constants.constants import Setpoint
 from rev import SparkBase
 
-class MoveToL1Command(Command):
+class MoveToZeroCommand(Command):
     def __init__(self, coral: CoralSubsystem):
         super().__init__()
         self.coral = coral
@@ -20,5 +20,4 @@ class MoveToL1Command(Command):
         return True
 
     def end(self, interrupted):
-        if interrupted is True:
-            return True
+        self.coral.stop_intake()

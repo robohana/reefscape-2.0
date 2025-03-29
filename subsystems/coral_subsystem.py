@@ -1,12 +1,11 @@
 
 import commands2
-from commands2 import Command, StartEndCommand
+from commands2 import Command, StartEndCommand, FunctionalCommand
 
 from constants.constants import CoralSubsystemConstants, Setpoint, OIConstants
-
-from wpilib import XboxController, DigitalInput
-from wpilib import SmartDashboard as sd
-from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, SparkFlex, SparkFlexConfig, MAXMotionConfig, LimitSwitchConfig, SparkLowLevel
+import time
+from wpilib import XboxController, DigitalInput, SmartDashboard as sd, Timer
+from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, SparkFlex, SparkFlexConfig, MAXMotionConfig
 
 
 class CoralSubsystem(commands2.SubsystemBase):
@@ -83,6 +82,8 @@ class CoralSubsystem(commands2.SubsystemBase):
 
         self.was_reset_by_limit = False
         self.was_reset_by_button = False
+
+        self.start_time = 0
 
         self.coral_sensor = DigitalInput(8)
 
@@ -189,7 +190,7 @@ class CoralSubsystem(commands2.SubsystemBase):
     #     print("Intake popped up!")  # Placeholder
 
     def is_object_detected(self):
-        return not self.coral_sensor.get()  # Adjust based on sensor logic (True when detected)
+        return not self.coral_sensor.get()  
     
     def get_arm_position(self):
         return self.arm_encoder.getPosition()

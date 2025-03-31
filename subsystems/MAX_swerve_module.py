@@ -1,13 +1,13 @@
 from math import pi
-import commands2
 
-from constants.constants import DriveConstants
+import commands2
 
 from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, ClosedLoopSlot
 
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 
+from constants.constants import DriveConstants
 
 class MAXSwerveModule(commands2.SubsystemBase):
     def __init__(self, drive_motor_channel: int, turn_motor_channel: int,  chassis_angular_offset: float) -> None:
@@ -18,11 +18,9 @@ class MAXSwerveModule(commands2.SubsystemBase):
         # self.debugTable = self.nt.getTable("SwerveDebug")
         # print("NetworkTables started: SwerveDebug should be available")
 
-
         driving_factor = DriveConstants.K_WHEEL_DIAMETER_METERS * pi / DriveConstants.K_DRIVING_MOTOR_REDUCTION
         turning_factor = 2 * pi
         driving_velocity_feed_forward = 1 / DriveConstants.K_DRIVE_WHEEL_FREE_SPEED_RPS
-
 
         self.drive_motor = SparkMax(drive_motor_channel, SparkMax.MotorType.kBrushless)
         self.turn_motor = SparkMax(turn_motor_channel, SparkMax.MotorType.kBrushless)
@@ -65,7 +63,6 @@ class MAXSwerveModule(commands2.SubsystemBase):
         self.chassis_angular_offset = chassis_angular_offset
         # self.desiredState.angle = Rotation2d(self.turningEncoder.getPosition())
         self.drive_encoder.setPosition(0)
-
 
     def getState(self) -> SwerveModuleState:
         """Returns the current state of the module."""

@@ -14,7 +14,8 @@ from commands2.button import CommandXboxController
 from wpimath import applyDeadband
 from wpimath.filter import SlewRateLimiter
 from wpilib import SmartDashboard as sd, SendableChooser
-from ntcore import NetworkTableInstance
+
+# from ntcore import NetworkTableInstance
 
 from subsystems.coral_subsystem import CoralSubsystem
 from subsystems.drivetrain import DriveSubsystem
@@ -22,14 +23,10 @@ from subsystems.algae_subsystem import AlgaeSubsystem
 
 from constants.constants import OIConstants
 
-from commands.SwerveJoystickCmd import SwerveJoystickCmd
-from commands.auto_routines import SimpleAuto
 from commands.coral_cmds import IntakeToZero, ScoreCoralL2, ScoreCoralL3, IntakeCoralStation
 from commands.algae_cmds import AlgaeLoadCommand, AlgaeScoreCommand, AlgaeZeroCommand, AlgaeOnCommand
 from commands.auto_routine_with_camera import SimpleScoreAutoRIGHT, SimpleScoreAutoLEFT
-from commands.auto_align_scoring_cmd import AutoAlignScoringCommand
 from commands.teleop_align_scoring_cmd import TeleopAlignScoringCommand
-
 
 class RobotContainer:
     """
@@ -40,9 +37,8 @@ class RobotContainer:
     """
 
     def __init__(self) -> None:
-
         # The robot's subsystems
-        self.robot_drive = DriveSubsystem()
+        self.drivetrain = DriveSubsystem()
         self.coral = CoralSubsystem()
         self.algae = AlgaeSubsystem()
 
@@ -55,40 +51,37 @@ class RobotContainer:
         self.y_speed_limiter = SlewRateLimiter(3)
         self.rot_limiter = SlewRateLimiter(3)
 
-        self.table = NetworkTableInstance.getDefault().getTable("limelight")
+        # self.table = NetworkTableInstance.getDefault().getTable("limelight")
 
-        
         # April Tag Chooser
         self.targetAprilTagChooser = SendableChooser()
-        self.targetAprilTagChooser.setDefaultOption("Tag 9", 9)
-        self.targetAprilTagChooser.addOption("Tag 7", 7)
-        self.targetAprilTagChooser.addOption("Tag 11", 11)
+        self.targetAprilTagChooser.setDefaultOption("Tag 9 - Red(RL)", 9)
+        self.targetAprilTagChooser.addOption("Tag 11 - Red(RR)", 11)
+        self.targetAprilTagChooser.addOption("Tag 20 - Blue(RR)", 20)
+        self.targetAprilTagChooser.addOption("Tag 22 - Blue(RL)", 22)
         sd.putData("Target AprilTag", self.targetAprilTagChooser)
-
 
         # Configure default commands
         self.set_default_command()
 
         # Configure the button bindings
         self.configure_button_bindings()
-
-                                        
-        
+                           
     # Set default command
     def set_default_command (self) -> None:
         # The left stick controlls translantion of the robot.
         # Turning is controled by the X axis of the right stick
 
-        self.robot_drive.setDefaultCommand(
+        self.drivetrain.setDefaultCommand(
             RunCommand(
-                lambda: self.robot_drive.drive(
+                lambda: self.drivetrain.drive(
                     # Apply Slew Rate Limiters then Apply Deadband
                     self.x_speed_limiter.calculate(applyDeadband(self.driver_controller.getLeftY() * -1, OIConstants.DEADZONE)),
                     self.y_speed_limiter.calculate(applyDeadband(self.driver_controller.getLeftX() * -1, OIConstants.DEADZONE)),
                     self.rot_limiter.calculate(applyDeadband(self.driver_controller.getRightX() * -1, OIConstants.DEADZONE)),
                     True
                 ),
-                self.robot_drive 
+                self.drivetrain 
             ) 
         )
 
@@ -98,7 +91,7 @@ class RobotContainer:
         Use this method to define your button->command mappings. Buttons can be created by
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
-        # """  
+        """  
       
         """Coral Roller Controls"""        
         # OPERATOR Left Bumper -> Run Coral Intake
@@ -128,19 +121,13 @@ class RobotContainer:
 
         """Zero Swerve Heading Control"""
         # DRIVER A Button -> Zero swerve heading
-        self.driver_controller.a().onTrue(InstantCommand(lambda: self.robot_drive.zero_heading(), self.robot_drive))
+        self.driver_controller.a().onTrue(InstantCommand(lambda: self.drivetrain.zero_heading(), self.drivetrain))
 
         """Auto Align Controls"""
-        # Bind scoring left to x:
-        self.driver_controller.x().whileTrue(
-            TeleopAlignScoringCommand(self.robot_drive, 'left', 2.5, 1.25)
-        )
-
-        # Bind scoring right to b:
-        self.driver_controller.b().whileTrue(
-            TeleopAlignScoringCommand(self.robot_drive, 'right', 2.5, 1.25)
-        )
-
+        # DRIVER X Button -> Align with left reef pole
+        self.driver_controller.x().whileTrue(TeleopAlignScoringCommand(self.drivetrain, 'left', 2.5, 1.25))
+        # DRIVER X Button -> Align with right reef pole
+        self.driver_controller.b().whileTrue(TeleopAlignScoringCommand(self.drivetrain, 'right', 2.5, 1.25))
 
     def disablePIDSubsystems(self) -> None:
         """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
@@ -150,11 +137,8 @@ class RobotContainer:
     def getAutonomousCommand(self) -> Command:
         """Selects and returns the autonomous command based on the chooser settings."""
         targetTag = self.targetAprilTagChooser.getSelected()
-
-
-
-        return SimpleScoreAutoLEFT(self.robot_drive, self.coral, targetTag)
+        return SimpleScoreAutoLEFT(self.drivetrain, self.coral, targetTag)
     
-    def periodic(self) -> None:
-        current_tv = self.table.getNumber("tv", 0)
-        sd.putBoolean("I see April Tag", current_tv)
+    # def periodic(self) -> None:
+    #     current_tv = self.table.getNumber("tv", 0)
+    #     sd.putBoolean("I see April Tag", current_tv)

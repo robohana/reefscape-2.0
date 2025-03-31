@@ -13,8 +13,8 @@ class MoveToZeroCommand(Command):
         pass
 
     def execute(self):
-        self.coral.arm_closed_loop_controller.setReference(Setpoint.Arm.K_LEVEL_1, SparkBase.ControlType.kPosition)
-        self.coral.elevator_closed_loop_controller.setReference(Setpoint.Elevator.K_LEVEL_1, SparkBase.ControlType.kPosition)
+        self.coral.arm_closed_loop_controller.setReference(Setpoint.Arm.K_ZERO, SparkBase.ControlType.kPosition)
+        self.coral.elevator_closed_loop_controller.setReference(Setpoint.Elevator.K_ZERO, SparkBase.ControlType.kPosition)
         
     def isFinished(self):
         return True

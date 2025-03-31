@@ -40,9 +40,11 @@ class MyRobot(TimedCommandRobot):
         print("WPILib Data Logging Enabled")
 
         self.LEDChooser = SendableChooser()
-        self.LEDChooser.setDefaultOption("Strobe Blue", BlinkinColor.STROBE_BLUE)
+        self.LEDChooser.setDefaultOption("Orange", BlinkinColor.ORANGE)
         self.LEDChooser.addOption("Strobe Red", BlinkinColor.STROBE_RED)
-        self.LEDChooser.addOption("Orange", BlinkinColor.ORANGE)
+        self.LEDChooser.addOption("Strobe Blue", BlinkinColor.STROBE_BLUE)
+        self.LEDChooser.addOption("Red", BlinkinColor.RED)
+        self.LEDChooser.addOption("Blue", BlinkinColor.BLUE)
         sd.putData("LED Chooser", self.LEDChooser)
         
     def robotPeriodic(self) -> None:

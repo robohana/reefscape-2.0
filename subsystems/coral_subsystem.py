@@ -1,12 +1,11 @@
 
 import commands2
-from commands2 import Command, StartEndCommand, FunctionalCommand
+from commands2 import Command, StartEndCommand
 
 from constants.constants import CoralSubsystemConstants, Setpoint, OIConstants
-import time
-from wpilib import XboxController, DigitalInput, SmartDashboard as sd, Timer
-from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, SparkFlex, SparkFlexConfig, MAXMotionConfig
+from wpilib import XboxController, DigitalInput, SmartDashboard as sd
 
+from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, SparkFlex, SparkFlexConfig, MAXMotionConfig
 
 class CoralSubsystem(commands2.SubsystemBase):
     def __init__(self) -> None:
@@ -79,7 +78,6 @@ class CoralSubsystem(commands2.SubsystemBase):
         self.arm_encoder.setPosition(0)
         self.elevator_encoder.setPosition(0)    
 
-
         self.was_reset_by_limit = False
         self.was_reset_by_button = False
 
@@ -135,7 +133,7 @@ class CoralSubsystem(commands2.SubsystemBase):
             print(f"Initializing setSetpointCommand with setpoint: {self.setpoint}")
             setpoint_map = {
                 Setpoint.K_CORAL_STATION: (Setpoint.Arm.K_CORAL_STATION, Setpoint.Elevator.K_CORAL_STATION),
-                Setpoint.K_LEVEL_1: (Setpoint.Arm.K_LEVEL_1, Setpoint.Elevator.K_LEVEL_1),
+                Setpoint.K_ZERO: (Setpoint.Arm.K_ZERO, Setpoint.Elevator.K_ZERO),
                 Setpoint.K_LEVEL_2: (Setpoint.Arm.K_LEVEL_2, Setpoint.Elevator.K_LEVEL_2),
                 Setpoint.K_LEVEL_3: (Setpoint.Arm.K_LEVEL_3, Setpoint.Elevator.K_LEVEL_3),
                 Setpoint.K_POP: (Setpoint.Arm.K_POP, Setpoint.Elevator.K_POP),
@@ -198,14 +196,14 @@ class CoralSubsystem(commands2.SubsystemBase):
     def get_elevator_position(self):
         return self.elevator_encoder.getPosition()   
     
-    def periodic(self):
-        # self.move_to_setpoint(self.arm_current_target, self.elevator_current_target)
-        # self.zero_elevator_on_limit_switch()
-        # self.zero_on_user_button()
+    # def periodic(self):
+    #     # self.move_to_setpoint(self.arm_current_target, self.elevator_current_target)
+    #     # self.zero_elevator_on_limit_switch()
+    #     # self.zero_on_user_button()
 
-        # Display subsystem values
-        #sd.putNumber("Coral/Arm/Target Position", self.arm_current_target)
-        sd.putNumber("Coral/Arm/Actual Position", self.arm_encoder.getPosition())
-        #sd.putNumber("Coral/Elevator/Target Position", self.elevator_current_target)
-        sd.putNumber("Coral/Elevator/Actual Position", self.elevator_encoder.getPosition())
-        sd.putNumber("Coral/Intake/Applied Output", self.intake_motor.getAppliedOutput())
+    #     # Display subsystem values
+    #     #sd.putNumber("Coral/Arm/Target Position", self.arm_current_target)
+    #     sd.putNumber("Coral/Arm/Actual Position", self.arm_encoder.getPosition())
+    #     #sd.putNumber("Coral/Elevator/Target Position", self.elevator_current_target)
+    #     sd.putNumber("Coral/Elevator/Actual Position", self.elevator_encoder.getPosition())
+    #     sd.putNumber("Coral/Intake/Applied Output", self.intake_motor.getAppliedOutput())

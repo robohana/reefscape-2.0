@@ -1,13 +1,10 @@
 # #!/usr/bin/env python3
 
-
 from math import pi
-from wpimath.filter import SlewRateLimiter
+# from wpimath.filter import SlewRateLimiter
 from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath import units
-
-
 
 class DriveConstants:
     # Constants for the swerve module 
@@ -66,19 +63,14 @@ class DriveConstants:
     # K_TELE_DRIVE_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3  # to be adjusted
     # K_TELE_DRIVE_MAX_ANGULAR_ACCELERATION_UNITS_PER_SECOND = 3  # to be adjusted 
 
-
-
-
 class OIConstants:
     # Constants for the Operator Interface
-
     K_DRIVER_CONTROLLER_PORT = 0
     K_OPERATOR_CONTROLLER_PORT = 1
     DEADZONE = 0.15
 
 class RobotConstants:
-
-        # Robot Dimemsions
+    # Robot Dimemsions
     K_TRACK_WIDTH = units.inchesToMeters(23.375) # ~23 3/8 in, ~0.593725m
      # Distance between centers of right and left wheels
     K_WHEEL_BASE = units.inchesToMeters(23.375) # ~23 3/8 in, ~0.593725m
@@ -112,7 +104,7 @@ class RobotConstants:
     K_BACK_RIGHT_TURN_ID = 26
     K_BACK_RIGHT_DRIVING_MOTOR_REVERSED = True
     K_BACK_RIGHT_TURNING_MOTOR_REVERSED = False
-    K_BACK_RIGHT_CHASSIS_ANGULAR_OFFSET = pi/2
+    K_BACK_RIGHT_CHASSIS_ANGULAR_OFFSET = pi / 2
 
 
     K_FRONT_LEFT_LOCATION = Translation2d(K_WHEEL_BASE / 2 , K_TRACK_WIDTH / 2) 
@@ -130,21 +122,21 @@ class RobotConstants:
 
 class Setpoint:
     K_CORAL_STATION = "Coral Station"
-    K_LEVEL_1 = "1"
+    K_ZERO = "0"
     K_LEVEL_2 = "2"
     K_LEVEL_3 = "3"
     K_POP = "Pop"
 
     class Arm:
         K_CORAL_STATION = -13.5 # 33 for rev
-        K_LEVEL_1 = 0
+        K_ZERO = 0
         K_LEVEL_2 = -43 # 2 for rev
         K_LEVEL_3 = -43 # 2 for rev
         K_POP = -14
 
     class Elevator:
         K_CORAL_STATION = 0 
-        K_LEVEL_1 = 0
+        K_ZERO = 0
         K_LEVEL_2 = 1
         K_LEVEL_3 = 30   # 100 for rev 
         K_POP = 0
@@ -210,3 +202,7 @@ class AutoConstants:
 class BlinkinColor:
     ORANGE = 0.63
     GREEN = 0.77
+    RED = 0.61
+    BLUE = 0.85
+    STROBE_BLUE = -0.09
+    STROBE_RED = -0.11

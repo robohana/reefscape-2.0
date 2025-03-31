@@ -1,14 +1,16 @@
 # drive_to_limelight_target.py
-import wpilib
 from commands2 import Command
+
 from ntcore import NetworkTableInstance
+
+# import limelightresults
+
 from subsystems.drivetrain import DriveSubsystem
-import limelight
-import limelightresults
+
 from constants.constants import AutoConstants
 
 class DriveToLimelightTarget(Command):
-    def __init__(self, drivetrain: DriveSubsystem, target_area_threshold=2.12, drive_speed=0.15, target_tag_id=22):
+    def __init__(self, drivetrain: DriveSubsystem, target_area_threshold=2.12, drive_speed=0.15, target_tag_id=None):
         """
         Drives forward until the Limelight target area exceeds a threshold.
         
@@ -37,9 +39,8 @@ class DriveToLimelightTarget(Command):
         tx = self.table.getNumber("tx", 0)
         ta = self.table.getNumber("ta", 0)
         ty = self.table.getNumber("ty", 0)
-        
 
-        limelightresults.FiducialResult(tx)
+        # limelightresults.FiducialResult(tx)
 
         # If a target is seen:
         if tv >= 1.0:
@@ -51,7 +52,7 @@ class DriveToLimelightTarget(Command):
             forward_corractions *= AutoConstants.K_MAX_SPEED_METERS_PER_SECOND
             # Drive forward at drive_speed with correction
             # TODO: need x value to be ty, say like forward position = ty * kp forward, apply this value to the drive speed
-            self.drivetrain.drive(forward_corractions, 0, turn_correction, False)
+            self.drivetrain.drive(forward_corractions, 0, turn_correction, False) # Field Relative False for Auto
             print(f"Driving: tx={tx}, ty={ty}, ta={ta}, turn_correction={turn_correction}")
         else:
             # No target seen

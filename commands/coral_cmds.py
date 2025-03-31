@@ -1,6 +1,8 @@
 from commands2 import SequentialCommandGroup
+
 from subsystems.coral_subsystem import CoralSubsystem
-from commands.intake_cmd import ReleaseIntakeCommand, RunIntakeCommand
+
+from commands.intake_cmd import RunIntakeCommand
 from commands.move_to_coral_station_cmd import MoveToCoralStation
 from commands.move_to_zero_cmd import MoveToZeroCommand
 from commands.move_to_l2_cmd import MoveToL2Command

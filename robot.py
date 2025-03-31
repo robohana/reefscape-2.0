@@ -9,7 +9,8 @@ robotPeriodic() methods at the bottom of this file should generally remain uncha
 '''
 
 from commands2 import CommandScheduler, TimedCommandRobot
-from wpilib import DataLogManager, DriverStation, run, SmartDashboard as sd, Spark, LiveWindow
+from wpilib import DataLogManager, DriverStation, run, SmartDashboard as sd, Spark, SendableChooser
+
 from robot_container import RobotContainer
 from constants.constants import BlinkinColor
 # from subsystems.drivetrain import DriveSubsystem
@@ -24,7 +25,7 @@ class MyRobot(TimedCommandRobot):
         #self.driver_controller = self.container.driver_controller
 
         #self.drive = self.Container.drive
-        #self.robotDrive = self.container.robot_drive
+        #self.robotDrive = self.container.drivetrain
         #CommandScheduler.getInstance().registerSubsystem(self.robotDrive)
 
         # global robotDrive #expose the drive subsystem globally (nothing can go wrong, right?)
@@ -38,15 +39,18 @@ class MyRobot(TimedCommandRobot):
         DriverStation.startDataLog(DataLogManager.getLog())  # Log joystick inputs
         print("WPILib Data Logging Enabled")
 
-        # LiveWindow.setEnabled(True)
+        self.LEDChooser = SendableChooser()
+        self.LEDChooser.setDefaultOption("Strobe Blue", BlinkinColor.STROBE_BLUE)
+        self.LEDChooser.addOption("Strobe Red", BlinkinColor.STROBE_RED)
+        self.LEDChooser.addOption("Orange", BlinkinColor.ORANGE)
+        sd.putData("LED Chooser", self.LEDChooser)
         
-
-
     def robotPeriodic(self) -> None:
         CommandScheduler.getInstance().run()
         # position = self.hang.get_current_position()
         # sd.putNumber("Hang Position", position)
-
+        color = self.LEDChooser.getSelected()
+        self.blinkin.set(color)
 
     def disabledInit(self) -> None:
         pass
@@ -57,7 +61,7 @@ class MyRobot(TimedCommandRobot):
     def autonomousInit(self) -> None:
         #pass
         #print("Starting Autonomous... ")
-        self.blinkin.set(-0.11)
+        # self.blinkin.set(-0.11)
 
         self.autonomousCommand = self.container.getAutonomousCommand()
         if self.autonomousCommand is not None:
@@ -69,10 +73,10 @@ class MyRobot(TimedCommandRobot):
     def teleopInit(self) -> None:
         #pass
         print("Starting TeleOp... ")
-        self.blinkin.set(-0.09)
+        # self.blinkin.set(BlinkinColor.ORANGE)
 
         # Reset the odometry using the current gyro reading
-        # self.robot_drive.reset_odometry(self.robot_drive.get_pose())
+        # self.drivetrain.reset_odometry(self.drivetrain.get_pose())
         # SwerveModule.resetEncoders()
         # if self.autonomousCommand is not None:
         #     self.autonomousCommand.cancel()
@@ -83,11 +87,8 @@ class MyRobot(TimedCommandRobot):
     def testInit(self) -> None:
         CommandScheduler.getInstance().run()
         
-
     def testPeriodic(self) -> None:
         pass
-
-
 
 if __name__ == "__main__":
     run(MyRobot)

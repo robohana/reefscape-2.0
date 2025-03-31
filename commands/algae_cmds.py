@@ -1,7 +1,6 @@
 from commands2 import Command
 from subsystems.algae_subsystem import AlgaeSubsystem
 from constants.constants import Setpoint
-from rev import SparkBase
 
 class AlgaeLoadCommand(Command):
     def __init__(self, algae: AlgaeSubsystem):
@@ -81,5 +80,3 @@ class AlgaeOnCommand(Command):
     def end(self, interrupted):
         if interrupted is True:
             return True
-
-        

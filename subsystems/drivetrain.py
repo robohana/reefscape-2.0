@@ -10,6 +10,8 @@ import time
 import threading
 
 from commands2 import Subsystem
+
+from wpilib import SmartDashboard as sd
 from wpimath.geometry import Pose2d, Rotation2d
 from wpimath.kinematics import (
     ChassisSpeeds,
@@ -18,11 +20,11 @@ from wpimath.kinematics import (
     SwerveDrive4Odometry
 )
 
+from navx import AHRS, _navx
+
 from constants.constants import RobotConstants, DriveConstants
-from wpilib import SmartDashboard as sd
 
 from subsystems.MAX_swerve_module import MAXSwerveModule
-from navx import AHRS, _navx
 
 
 class DriveSubsystem(Subsystem):
@@ -107,8 +109,8 @@ class DriveSubsystem(Subsystem):
             )
         
         # sd.putString("Robot Odometer", str(self.getModulePositionsOld()))
-        sd.putString("Robot Location, x", str(self.get_pose().X()))
-        sd.putString("Robot Location, y", str(self.get_pose().Y()))
+        # sd.putString("Robot Location, x", str(self.get_pose().X()))
+        # sd.putString("Robot Location, y", str(self.get_pose().Y()))
         sd.putString("Robot Location, rotation", str(self.get_pose().rotation().degrees()))    
 
         # Publish swerve module states and chassis speeds for AdvantageScope
@@ -121,7 +123,6 @@ class DriveSubsystem(Subsystem):
         except Exception as e:
             print(f"Error resetting gyro: {e}")
 
-    
     def get_pose(self) -> Pose2d:
         """Returns the currently-estimated pose of the robot.
 
@@ -275,7 +276,6 @@ class DriveSubsystem(Subsystem):
         self.back_left.set_desired_state(desired_states[2])
         self.back_right.set_desired_state(desired_states[3])
 
-
     # def getModulePositionsOld(self) -> tuple[SwerveModulePosition, SwerveModulePosition,SwerveModulePosition,SwerveModulePosition]:
     #     return (
     #             SwerveModulePosition(self.front_left.get_position(), Rotation2d(self.front_left.get_position())),
@@ -331,7 +331,6 @@ class DriveSubsystem(Subsystem):
         """Stops the module."""
         self.drive(0, 0, 0, False)
 
-
     # def publishSwerveStates(self):
     #     """Publishes swerve module states and chassis speeds to AdvantageScope using correct struct format."""
         
@@ -369,8 +368,6 @@ class DriveSubsystem(Subsystem):
 
     #     #chassisSpeeds = DrivingConstants.kinematics.toChassisSpeeds(*moduleStates)
 
-
-
     #     #  Use setStruct to publish structured data for AdvantageScope
     #     self.swerveTable.getStructArrayTopic("ModuleStates", SwerveModuleState).publish().set(moduleStates)
     #     self.swerveTable.getStructTopic("ChassisSpeeds", ChassisSpeeds).publish().set(chassisSpeeds)
@@ -384,9 +381,4 @@ class DriveSubsystem(Subsystem):
             self.back_left.getState(),
             self.back_right.getState(),
         ]
-
-
-
-
-
 

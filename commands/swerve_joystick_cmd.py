@@ -1,4 +1,4 @@
-from constants.constants import OIConstants, DriveConstants, RobotConstants
+from constants.constants import OIConstants, RobotConstants
 from wpimath.filter import SlewRateLimiter
 from commands2 import Command 
 from wpilib import XboxController
@@ -7,13 +7,12 @@ from subsystems.drivetrain import DriveSubsystem
 from wpimath.kinematics import ChassisSpeeds
 from wpilib import SmartDashboard as sd
 
-class SwerveJoystickCmd(Command):
-
-    def __init__(self, robot_drive: DriveSubsystem, driver_controller:XboxController):
+class SwerveJoystickCommand(Command):
+    def __init__(self, drivetrain: DriveSubsystem, driver_controller:XboxController):
         super().__init__()
-        self.robot_drive = robot_drive
+        self.drivetrain = drivetrain
         self.driver_controller = driver_controller
-        self.addRequirements(self.robot_drive)
+        self.addRequirements(self.drivetrain)
         # create Slew limiter
         self.x_limiter = SlewRateLimiter(1)
         self.y_limiter = SlewRateLimiter(1)
@@ -34,16 +33,16 @@ class SwerveJoystickCmd(Command):
         self.z_rotation = applyDeadband(self.z_rotation, OIConstants.DEADZONE)
         
         # if self.fieldOriented:
-        chasis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(self.x_speed, self.y_speed, self.z_rotation, self.robot_drive.get_rotation_2d())
+        chasis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(self.x_speed, self.y_speed, self.z_rotation, self.drivetrain.get_rotation_2d())
         sd.putNumber("chasisSpeeds", chasis_speeds.vx)
 
         # 3. convert chasis speeds to module states
         module_states = RobotConstants.KINEMATICS.toSwerveModuleStates(chasis_speeds)
 
-        self.robot_drive.set_module_states(module_states)
+        self.drivetrain.set_module_states(module_states)
 
     def end(self, interrupted: bool):
-        self.robot_drive.stop()
+        self.drivetrain.stop()
 
     def isFinished(self):
         return False

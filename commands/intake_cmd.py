@@ -1,9 +1,10 @@
-import time
-import wpilib
-from commands2 import Command, InstantCommand, WaitUntilCommand, waitcommand
+# import time
+from commands2 import Command
+
 from wpilib import Timer
+# from wpimath.units import seconds
+
 from subsystems.coral_subsystem import CoralSubsystem
-from wpimath.units import seconds
 
 class RunIntakeCommand(Command):
     def __init__(self, coral: CoralSubsystem):
@@ -15,7 +16,6 @@ class RunIntakeCommand(Command):
         self.addRequirements(self.coral)  # Ensures command has exclusive control
 
     def initialize(self):
-        print("in init")
         """Called when the command starts."""
         self.timer.reset()
         self.timer.stop()
@@ -73,13 +73,12 @@ class MoveToSetpointCommand(Command):
 
     def initialize(self):
         print("Initializing move to setpoint")
-        self.start_time = wpilib.Timer.getFPGATimestamp()
+        self.start_time = Timer.getFPGATimestamp()
 
     def execute(self):
         # Update setpoint on every cycle
         #self.coral.move_to_setpoint(self.arm_setpoint, self.elevator_setpoint)
         self.coral.move_to_setpoint(self.arm_setpoint, self.elevator_setpoint)
-        
 
     def isFinished(self) -> bool:
         # Check if within tolerances or if timeout is reached.

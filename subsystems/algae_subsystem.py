@@ -2,7 +2,8 @@ import commands2
 
 from constants.constants import AlgaeSubsystemConstants
 
-from wpilib import SmartDashboard as sd
+# from wpilib import SmartDashboard as sd
+
 from rev import SparkMax, SparkMaxConfig, SparkBase, SparkBaseConfig, ClosedLoopConfig, MAXMotionConfig
 
 class AlgaeSubsystem(commands2.SubsystemBase):

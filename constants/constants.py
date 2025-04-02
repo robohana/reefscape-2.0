@@ -142,7 +142,7 @@ class Setpoint:
         K_POP = 0
 
     class Intake:
-        K_FORWARD = 0.7
+        K_FORWARD = 0.5 # 0.7 if we have issues
         K_REVERSE = -0.4
 
     # class Hang:
@@ -152,7 +152,7 @@ class Setpoint:
     #     K_DOWN_POSITION = -1  
 
     class Algae:
-        K_LOAD_POSITION = -16
+        K_LOAD_POSITION = -26
         K_LOCKED_POSITION = 0
 
         K_LOAD_POWER = -1
@@ -181,7 +181,7 @@ class AlgaeSubsystemConstants:
     K_ANGLE_MOTOR_CHANNEL = 34
     K_ROLLER_MOTOR_CHANNEL = 35
     # PID for the angle motor
-    K_P = 0.9
+    K_P = 0.8
     K_I = 0
     K_D = 0
 

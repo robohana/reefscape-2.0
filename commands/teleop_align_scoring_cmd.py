@@ -68,8 +68,8 @@ class TeleopAlignScoringCommand(Command):
         current_tv = self.table.getNumber("tv", 0)
         
         # Print if we can see tv or not after we convert it to a boolean value
-        targetVisible = bool(current_tv)
-        sd.putBoolean("Target Visible", targetVisible)
+        # targetVisible = bool(current_tv)
+        # sd.putBoolean("Target Visible", targetVisible)
 
         elapsed_time = time.time() - self.start_time
        

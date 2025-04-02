@@ -10,6 +10,7 @@ robotPeriodic() methods at the bottom of this file should generally remain uncha
 
 from commands2 import CommandScheduler, TimedCommandRobot
 from wpilib import DataLogManager, DriverStation, run, SmartDashboard as sd, Spark, SendableChooser
+from ntcore import NetworkTableInstance
 
 from robot_container import RobotContainer
 from constants.constants import BlinkinColor
@@ -39,6 +40,8 @@ class MyRobot(TimedCommandRobot):
         DriverStation.startDataLog(DataLogManager.getLog())  # Log joystick inputs
         print("WPILib Data Logging Enabled")
 
+        self.table = NetworkTableInstance.getDefault().getTable("limelight")
+
         self.LEDChooser = SendableChooser()
         self.LEDChooser.setDefaultOption("Orange", BlinkinColor.ORANGE)
         self.LEDChooser.addOption("Strobe Red", BlinkinColor.STROBE_RED)
@@ -53,6 +56,9 @@ class MyRobot(TimedCommandRobot):
         # sd.putNumber("Hang Position", position)
         color = self.LEDChooser.getSelected()
         self.blinkin.set(color)
+        current_tv = self.table.getNumber("tv", 0)
+        target_visible = bool(current_tv)
+        sd.putBoolean("Target Visible", target_visible)
 
     def disabledInit(self) -> None:
         pass

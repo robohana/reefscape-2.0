@@ -61,6 +61,26 @@ class AlgaeZeroCommand(Command):
     def end(self, interrupted):
         if interrupted is True:
             return True
+
+class AlgaeCoralCommand(Command):
+    def __init__(self, algae: AlgaeSubsystem):
+        super().__init__()
+        self.algae = algae
+        self.addRequirements(self.algae)
+
+    def initialize(self):
+        pass
+
+    def execute(self):
+        self.algae.move_to_setpoint(Setpoint.Algae.K_LAUNCH_POSITION)
+        self.algae.set_roller_power(Setpoint.Algae.K_LOCKED_POWER)
+
+    def isFinished(self):
+        return True
+
+    def end(self, interrupted):
+        if interrupted is True:
+            return True
         
 class AlgaeOnCommand(Command):
     def __init__(self, algae: AlgaeSubsystem):

@@ -24,9 +24,10 @@ from subsystems.algae_subsystem import AlgaeSubsystem
 from constants.constants import OIConstants
 
 from commands.coral_cmds import IntakeToZero, ScoreCoralL2, ScoreCoralL3, IntakeCoralStation
-from commands.algae_cmds import AlgaeLoadCommand, AlgaeScoreCommand, AlgaeZeroCommand, AlgaeOnCommand
+from commands.algae_cmds import AlgaeLoadCommand, AlgaeScoreCommand, AlgaeZeroCommand, AlgaeOnCommand, AlgaeCoralCommand
 from commands.auto_routine_with_camera import SimpleScoreAutoRIGHT, SimpleScoreAutoLEFT
 from commands.teleop_align_scoring_cmd import TeleopAlignScoringCommand
+from commands.auto_routines import SimpleAuto
 
 class RobotContainer:
     """
@@ -54,12 +55,23 @@ class RobotContainer:
         # self.table = NetworkTableInstance.getDefault().getTable("limelight")
 
         # April Tag Chooser
-        self.targetAprilTagChooser = SendableChooser()
-        self.targetAprilTagChooser.setDefaultOption("Tag 9 - Red(RL)", 9)
-        self.targetAprilTagChooser.addOption("Tag 11 - Red(RR)", 11)
-        self.targetAprilTagChooser.addOption("Tag 20 - Blue(RR)", 20)
-        self.targetAprilTagChooser.addOption("Tag 22 - Blue(RL)", 22)
-        sd.putData("Target AprilTag", self.targetAprilTagChooser)
+        # self.targetAprilTagChooser = SendableChooser()
+        # self.targetAprilTagChooser.setDefaultOption("Tag 9 - Red(RL)", 9) # RL: Robot Left
+        # self.targetAprilTagChooser.addOption("Tag 11 - Red(RR)", 11) # RR: Robot Right
+        # self.targetAprilTagChooser.addOption("Tag 20 - Blue(RR)", 20)
+        # self.targetAprilTagChooser.addOption("Tag 22 - Blue(RL)", 22)
+        # sd.putData("Target AprilTag", self.targetAprilTagChooser)
+        # targetTag = self.targetAprilTagChooser.getSelected()
+
+        self.auto_chooser = SendableChooser()
+        self.auto_chooser.setDefaultOption("9 - Drive and Score", SimpleScoreAutoLEFT(self.drivetrain, self.coral, 9)) # Auto align score Left and l2 from april tag 9
+        self.auto_chooser.addOption("11 - Drive and Score", SimpleScoreAutoLEFT(self.drivetrain, self.coral, 11)) # Auto align score Left and l2 from april tag 11 
+        self.auto_chooser.addOption("20 - Drive and Score", SimpleScoreAutoLEFT(self.drivetrain, self.coral, 20)) # Auto align score Left and l2 from april tag 20
+        self.auto_chooser.addOption("22 - Drive and Score", SimpleScoreAutoLEFT(self.drivetrain, self.coral, 22)) # Auto align score Left and l2 from april tag 22
+        self.auto_chooser.addOption("Drive", SimpleAuto(self.drivetrain)) # drive backwards for 4 seconds
+        sd.putData("Auto Chooser", self.auto_chooser)
+
+        # print ("target", targetTag)
 
         # Configure default commands
         self.set_default_command()
@@ -114,8 +126,10 @@ class RobotContainer:
         self.operator_controller.povDown().onTrue(AlgaeLoadCommand(self.algae))
         # OPERATOR D-PAD UP -> Algae Grabber/Roller to zero position
         self.operator_controller.povUp().onTrue(AlgaeZeroCommand(self.algae))
-        # OPERATOR D PAD RIGHT -> Algae Grabber/Roller to load position
+        # OPERATOR D PAD RIGHT -> Algae Grabber/Roller to score position
         self.operator_controller.povRight().onTrue(AlgaeScoreCommand(self.algae))
+        # OPERATOR D PAD Left -> Algae Grabber/Roller to launch coral position
+        self.operator_controller.povLeft().onTrue(AlgaeCoralCommand(self.algae))
         # OPERATOR LEFT TRIGGER -> Algae Roller On
         self.operator_controller.leftTrigger().whileTrue(AlgaeOnCommand(self.algae))
 
@@ -136,8 +150,8 @@ class RobotContainer:
 
     def getAutonomousCommand(self) -> Command:
         """Selects and returns the autonomous command based on the chooser settings."""
-        targetTag = self.targetAprilTagChooser.getSelected()
-        return SimpleScoreAutoLEFT(self.drivetrain, self.coral, targetTag)
+        auto = self.auto_chooser.getSelected()
+        return auto
     
     # def periodic(self) -> None:
     #     current_tv = self.table.getNumber("tv", 0)

@@ -154,6 +154,7 @@ class Setpoint:
     class Algae:
         K_LOAD_POSITION = -26
         K_LOCKED_POSITION = 0
+        K_LAUNCH_POSITION = -17
 
         K_LOAD_POWER = -1
         K_SCORE_POWER = 0.5
